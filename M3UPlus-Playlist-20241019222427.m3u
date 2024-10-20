@@ -1,4 +1,7 @@
-#EXTM3U url-tvg=""
+#EXTM3U
+#EXTM3U x-tvg-url="https://avkb.short.gy/tsepg.xml.gz"
+#EXTM3U x-tvg-url="https://avkb.short.gy/jioepg.xml.gz"
+
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=https://m3u.yuvraj49.xyz/tp/KxADf57dd1Dt/keys/key?id=1363
 #EXTINF:-1 tvg-id="ts1363" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/TPANML_Thumbnail-v2/TPANML_Thumbnail.png" group-title="Kids",Tata Play Anime Local
