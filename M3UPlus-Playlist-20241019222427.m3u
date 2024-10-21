@@ -15,8 +15,6 @@ https://tgaadi-web.tech/restream/opplex.php?tv=26187
 http://103.124.251.164:28015/play/a02n/index.m3u8
 #EXTINF:-1 tvg-id="Gubbare" tvg-name="Gubbare" tvg-logo="https://www.epicon.in/img/gubbare-logo.png" group-title="Kids",Gubbare
 https://epiconvh.s.llnwi.net/gubbare/master.m3u8
-#EXTINF:-1 tvg-id="Super Hungama" tvg-name="Super Hungama" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/7/74/Super_Hungama_Logo.png/220px-Super_Hungama_Logo.png" group-title="Kids",Super Hungama
-http-user-agent=Safari/537.36 https://m3u.yuvraj43.xyz/tp/KxADf57dd1Dt/manifest/587.mpd|User-Agent=Safari/537.36
 #EXTINF:-1 tvg-id="Nick Hindi" tvg-name="Nick Hindi" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Nickelodeon_2023_logo_%28outline%29.svg/512px-Nickelodeon_2023_logo_%28outline%29.svg.png" group-title="Kids",Nick Hindi
 https://tgaadi-web.tech/restream/opplex.php?tv=150482
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Sonic Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/sonic_Hindi.png" group-title="Kids",Sonic Hindi
