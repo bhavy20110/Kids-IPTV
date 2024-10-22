@@ -3,7 +3,7 @@
 http://119.156.26.155:8000/play/a05u/index.m3u8
 #EXTINF:-1 tvg-id="Hungama Kids" tvg-name="Hungama Kids" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids
 https://tgaadi-web.tech/restream/opplex.php?tv=150480
-#EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
+#EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Multi-Audio" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
 https://tgaadi-web.tech/restream/opplex.php?tv=150478
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Disney India HD" tvg-logo="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExQWFhUXGBoWFxUYGBgeFRoVFx0aGBcgGBkYHSggHRomGxUXITEiJSorLi4uGR8zODMtNygtLisBCgoKDg0OGxAQGy0lICUtLS8tMi0wLS0vLTAtLS01LS8tLS0tLS0tLS0tLS0tLS0vLS0tLS0tLS0rLS0tLS0tLf/AABEIAIcBdwMBEQACEQEDEQH/x" group-title="Kids",Disney India HD
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=167551%7CReferer=RANAPK
@@ -24,7 +24,7 @@ https://tgaadi-web.tech/restream/opplex.php?tv=150483
 #EXTINF:-1 tvg-id="Zoo Moo" tvg-name="Zoo Moo" tvg-logo="https://cdn.prod.website-files.com/64e961c3862892bff815289d/667534c959673c60d0418dad_logo_ZM_web_crop.webp" group-title="Kids",Zoo Moo
 https://amg01553-blueantmediaasi-zoomoonz-samsungnz-rdufn.amagi.tv/playlist/amg01553-blueantmediaasi-zoomoonz-samsungnz/playlist.m3u8
 #EXTINF:-1 tvg-id="Disney Junior" tvg-name="Disney Junior Hindi" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/b/bb/Disney_Junior.svg/512px-Disney_Junior.svg.png" group-title="Kids",Disney Junior Hindi
-http://103.124.251.164:28015/play/a02m/index.m3u8
+https://tgaadi-web.tech/stalker/portal.m3u8?id=863
 #EXTINF:-1 tvg-id="Masha And The Bear 24/7 (HINDI)" tvg-name="Masha And The Bear 24/7 (HINDI)" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSII5rVYvraesFMzybS8FD4o6IZluzTGt2HeQ&s" group-title="Kids",Masha And The Bear 24/7 (HINDI)
 https://tgaadi-web.tech/restream/opplex.php?tv=301506
 #EXTINF:-1 tvg-id="Shiva 24/7" tvg-name="Shiva 24/7(HINDI)" tvg-logo="https://i.pinimg.com/originals/f0/6f/eb/f06feb87fe59247f98f161be490a778d.jpg" group-title="Kids",Shiva 24/7
