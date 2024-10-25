@@ -27,7 +27,7 @@ https://amg01553-blueantmediaasi-zoomoonz-samsungnz-rdufn.amagi.tv/playlist/amg0
 http://103.124.251.164:28015/play/a02m/index.m3u8
 #EXTINF:-1 tvg-id="Nick HD+" tvg-name="Nick HD+" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Nick_HD_Plus.png" group-title="Kids",Nick HD+
 https://tgaadi-web.tech/restream/opplex.php?tv=76722
-#EXTINF:-1 tvg-id="Netflix Kids (HINDI)" tvg-name="Netflix Kids (HINDI)" tvg-logo="https://ibb.co.com/HpnDRCg" group-title="Kids",Netflix Kids (HINDI)
+#EXTINF:-1 tvg-id="Masha And The Bear 24/7(HINDI)" tvg-name="Masha And The Bear 24/7(HINDI)" tvg-logo="https://static.wikia.nocookie.net/masha-and-bear/images/a/a9/Masha_and_the_Bear.png/revision/latest?cb=20180612195257" group-title="Kids",Masha And The Bear 24/7(HINDI)
 https://tgaadi-web.tech/restream/opplex.php?tv=301506
 #EXTINF:-1 tvg-id="Shiva 24/7" tvg-name="Shiva 24/7(HINDI)" tvg-logo="https://i.pinimg.com/originals/f0/6f/eb/f06feb87fe59247f98f161be490a778d.jpg" group-title="Kids",Shiva 24/7
 https://tgaadi-web.tech/restream/opplex.php?tv=342074
@@ -37,3 +37,5 @@ https://tgaadi-web.tech/restream/opplex.php?tv=311373
 http://game.denver1769.in/port/tp3.m3u8?id=58634
 #EXTINF:-1 tvg-id="Chhota Bheem 24/7" tvg-name="Chhota Bheem 24/7" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Chhota_Bheem_logo.png/1200px-Chhota_Bheem_logo.png?20220228124519" group-title="Kids",Chhota Bheem 24/7
 https://tgaadi-web.tech/restream/opplex.php?tv=315401
+#EXTINF:-1 tvg-id="Oggy and the Cockroaches 24/7(HINDI)" tvg-name="Oggy and the Cockroaches 24/7(HINDI)" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/3/3b/Oggy_and_the_Cockroaches_Logo.webp" group-title="Kids",Oggy and the Cockroaches 24/7(HINDI)
+https://tgaadi-web.tech/restream/opplex.php?tv=308282
