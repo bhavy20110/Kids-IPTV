@@ -5,7 +5,9 @@ http://119.156.26.155:8000/play/a05u/index.m3u8
 https://tgaadi-web.tech/restream/opplex.php?tv=150480
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
 https://tgaadi-web.tech/restream/opplex.php?tv=150478
-#EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Disney India SD 2" tvg-logo="https://logodix.com/logo/619085.png" group-title="Kids",Disney India SD 2
+#EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Disney India SD 2" tvg-logo="https://mediaready.videoready.tv/tatasky-epg/image/fetch/f_auto,fl_lossy,q_auto,h_250,w_250/https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 2
+https://tgaadi-web.tech/restream/opplex.php?tv=167551
+#EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Disney India HD" tvg-logo="https://logodix.com/logo/619085.png" group-title="Kids",Disney India HD
 https://tgaadi-web.tech/restream/opplex.php?tv=167551
 #EXTINF:-1 tvg-id="Discovery Kids" tvg-name="Discovery Kids" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Discovery_Kids_Logo_2021-Presente.webp/215px-Discovery_Kids_Logo_2021-Presente.webp.png" group-title="Kids",Discovery Kids
 https://dplus.gammacdn.workers.dev/videos/113.m3u8
