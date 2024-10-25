@@ -1,6 +1,20 @@
 #EXTM3U
 #EXTINF:-1, Doraemon S01E01
-https://stream.gkbotz.workers.dev/dl/671a3677ebe49713c5e9fc6b
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b25f949786ef3e4a92b4e
+#EXTINF:-1, Doraemon Movie: Nobita's Dinosaur
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b25b949786ef3e4a92b4d
+#EXTINF:-1, Doraemon Movie: Doraemon and Adventure of Koya Koya Planet
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b26c049786ef3e4a92b54
+#EXTINF:-1, Doraemon Movie: Nobita The Explorer Bow! Bow!
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b270e49786ef3e4a92b55
+#EXTINF:-1, Doraemon Movie: Underwater Adventure
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b273449786ef3e4a92b56
+#EXTINF:-1, Doraemon Movie: Jadoo Mantar Aur Jahnoom
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b278649786ef3e4a92b58
+#EXTINF:-1, Doraemon Movie: Nobita's Little Space War
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b27b649786ef3e4a92b59
+#EXTINF:-1, Doraemon Movie: Nobita And the Steel Troops: New Age
+https://dcoolf2l-b0e5bd96bf18.herokuapp.com/dl/671b27fd49786ef3e4a92b5b
 #EXTINF:-1, Doraemon S01E02
 https://stream.gkbotz.workers.dev/dl/671a367aebe49713c5e9fc6c
 #EXTINF:-1, Doraemon S01E03
@@ -100,6 +114,6 @@ https://stream.gkbotz.workers.dev/dl/671a37e6ebe49713c5e9fc9c
 #EXTINF:-1, Doraemon S01E50
 https://stream.gkbotz.workers.dev/dl/671a37e9ebe49713c5e9fc9d
 #EXTINF:-1, Doraemon S01E51
-https://stream.gkbotz.workers.dev/dl/671a37ecebe49713c5e9fc9e
+https://stream.gkbotz.workers.dev/dl/671a37edebe49713c5e9fc9e
 #EXTINF:-1, Doraemon S01E52
-https://stream.gkbotz.workers.dev/dl/671a37efebe49713c5e9fc9f
+https://stream.gkbotz.workers.dev/dl/671a37f0ebe49713c5e9fc9f
