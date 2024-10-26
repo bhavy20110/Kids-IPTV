@@ -17,7 +17,7 @@ http://103.124.251.164:28015/play/a02n/index.m3u8
 https://epiconvh.s.llnwi.net/gubbare/master.m3u8
 #EXTINF:-1 tvg-id="Nick Hindi" tvg-name="Nick Hindi" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Nickelodeon_2023_logo_%28outline%29.svg/512px-Nickelodeon_2023_logo_%28outline%29.svg.png" group-title="Kids",Nick Hindi
 https://tgaadi-web.tech/restream/opplex.php?tv=150482
-#EXTINF:-1 tvg-id="Nick Junior" tvg-name="Nick Junior" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Nickelodeon_2023_logo_%28outline%29.svg/512px-Nickelodeon_2023_logo_%28outline%29.svg.png" group-title="Kids",Nick Junior
+#EXTINF:-1 tvg-id="Nick Junior" tvg-name="Nick Junior" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Nick_Junior.png" group-title="Kids",Nick Junior
 http://119.156.26.155:8000/play/a061/index.m3u8
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Sonic Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/sonic_Hindi.png" group-title="Kids",Sonic Hindi
 https://tgaadi-web.tech/restream/opplex.php?tv=34011
