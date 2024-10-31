@@ -22,10 +22,11 @@ header {
 .channel {
     margin: 10px;
     cursor: pointer;
+    text-align: center;
 }
 
 .channel img {
-    border-radius: 10px;
+    border-radius: 50%; /* Rounded edges */
     width: 100px;
     height: auto;
     transition: transform 0.2s;
@@ -33,6 +34,12 @@ header {
 
 .channel img:hover {
     transform: scale(1.1);
+}
+
+.channel p {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #ffffff;
 }
 
 #player {
