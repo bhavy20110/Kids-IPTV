@@ -2,6 +2,7 @@ fetch('M3UPlus-Playlist-20241019222427.m3u')
     .then(response => response.text())
     .then(data => {
         const channels = parseM3U(data);
+        console.log('Parsed Channels:', channels); // Log parsed channels for debugging
         displayChannels(channels);
     })
     .catch(error => console.error('Error fetching M3U file:', error));
@@ -20,10 +21,10 @@ function parseM3U(data) {
             }
             const nameMatch = line.match(/,(.+)$/);
             if (nameMatch) {
-                currentChannel.name = nameMatch[1];
+                currentChannel.name = nameMatch[1].trim(); // Trim whitespace
             }
         } else if (line && !line.startsWith('#')) {
-            currentChannel.url = line;
+            currentChannel.url = line.trim(); // Trim whitespace
             currentChannel.logo = getLogo(currentChannel.name); // Get logo based on name
         }
     });
@@ -36,7 +37,6 @@ function parseM3U(data) {
 }
 
 function getLogo(channelName) {
-    // You can define a mapping of channel names to logo URLs here
     const logos = {
         'DISNEY INDIA': 'path/to/disney_logo.png',
         'CNN': 'path/to/cnn_logo.png',
@@ -48,6 +48,7 @@ function getLogo(channelName) {
 
 function displayChannels(channels) {
     const container = document.getElementById('channel-container');
+    container.innerHTML = ''; // Clear the container before displaying
     channels.forEach(channel => {
         const channelDiv = document.createElement('div');
         channelDiv.classList.add('channel');
