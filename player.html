@@ -40,11 +40,6 @@
                     } else {
                         console.error('HLS not supported in this browser');
                     }
-                } else if (url.endsWith('.mpd')) {
-                    video.src = url; // Directly set the source for DASH
-                    video.addEventListener('loadedmetadata', function () {
-                        video.play();
-                    });
                 } else {
                     console.error('Unsupported stream format: ' + url);
                 }
