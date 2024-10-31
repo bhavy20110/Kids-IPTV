@@ -5,27 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
+    <script src="https://cdn.jwplayer.com/libraries/your-jwplayer-key.js"></script>
 </head>
 <body>
     <header>
         <h1>IPTV Player</h1>
     </header>
     <main>
-        <div id="player" style="width: 100%; height: 400px;"></div>
+        <div id="player"></div>
     </main>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('url');
 
-        flowplayer("#player", {
-            clip: {
-                sources: [
-                    { type: "application/x-mpegURL", src: streamUrl }
-                ]
-            },
-            autoplay: true
+        jwplayer("player").setup({
+            file: streamUrl,
+            width: "100%",
+            height: "400px",
+            autostart: true
         });
     </script>
 </body>
