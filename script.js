@@ -1,4 +1,3 @@
-// Function to fetch channels from the M3U file
 async function fetchChannels() {
     const response = await fetch('M3UPlus-Playlist-20241019222427.m3u');
     const data = await response.text();
@@ -6,7 +5,6 @@ async function fetchChannels() {
     loadChannels(channels);
 }
 
-// Function to parse M3U file content
 function parseM3U(data) {
     const lines = data.split('\n');
     const channels = [];
@@ -17,7 +15,7 @@ function parseM3U(data) {
             const parts = line.split(',');
             const name = parts[1].trim();
             currentChannel = { name };
-        } else if (line.trim()) {
+        } else if (line.trim() && !currentChannel.url) {
             currentChannel.url = line.trim();
             channels.push(currentChannel);
         }
@@ -26,7 +24,6 @@ function parseM3U(data) {
     return channels;
 }
 
-// Load channels into the GUI
 function loadChannels(channels) {
     const channelList = document.getElementById('channelList');
     channelList.innerHTML = '';
@@ -44,10 +41,8 @@ function loadChannels(channels) {
     });
 }
 
-// Function to play the selected stream
 function playStream(url, name) {
     window.location.href = `player.html?url=${url}&name=${name}`;
 }
 
-// Initialize fetching channels on page load
 window.onload = fetchChannels;
