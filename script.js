@@ -12,12 +12,12 @@ async function loadChannels() {
             currentChannel.name = channelInfo[1].trim();
         } else if (line.startsWith('http')) {
             currentChannel.url = line.trim();
-            const logo = currentChannel.name.toLowerCase().replace(/ /g, '-') + '.png'; // Assuming logos are named consistently
+            const logo = currentChannel.name.toLowerCase().replace(/ /g, '-') + '.png'; // Adjust logo naming
 
             const channelItem = document.createElement('div');
             channelItem.className = 'channel-item';
             channelItem.innerHTML = `
-                <img src="logos/${logo}" alt="${currentChannel.name} Logo" />
+                <img src="logos/${logo}" alt="${currentChannel.name} Logo" onerror="this.onerror=null; this.src='logos/default.png';" />
                 <a href="player.html?url=${encodeURIComponent(currentChannel.url)}&name=${encodeURIComponent(currentChannel.name)}">${currentChannel.name}</a>
             `;
             channelList.appendChild(channelItem);
