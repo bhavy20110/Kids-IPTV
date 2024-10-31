@@ -1,0 +1,52 @@
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+#channel-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#channel-list li {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+}
+
+.channel-logo {
+    width: 50px; /* Adjust logo size */
+    height: auto;
+    margin-right: 10px;
+}
+
+.player-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back-button:hover {
+    background-color: #333;
+}
