@@ -41,10 +41,14 @@ function displayChannels(channels) {
         const channelLogo = document.createElement('img');
         channelLogo.src = channel.logo || 'default-logo.png'; // Fallback logo
         channelLogo.alt = channel.name;
-        
+
+        const channelName = document.createElement('p');
+        channelName.textContent = channel.name;
+
         const channelLink = document.createElement('a');
         channelLink.href = `player.html?url=${encodeURIComponent(channel.url)}`;
         channelLink.appendChild(channelLogo);
+        channelLink.appendChild(channelName);
         
         channelDiv.appendChild(channelLink);
         channelList.appendChild(channelDiv);
