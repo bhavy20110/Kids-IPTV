@@ -1,25 +1,47 @@
 body {
-    background-color: #121212;
-    color: white;
+    background-color: #121212; /* Darker theme */
+    color: #ffffff;
     font-family: Arial, sans-serif;
 }
 
-.container {
-    width: 80%;
-    margin: auto;
-}
-
-.channel-list {
-    display: flex;
-    flex-wrap: wrap;
-}
-
 .channel-item {
+    display: flex;
+    align-items: center;
     margin: 10px;
-    text-align: center;
+    padding: 10px;
+    border-radius: 8px; /* Rounded edges for the channel item */
+    transition: background-color 0.3s;
 }
 
-.channel-item img {
-    width: 100px;
-    height: auto;
+.channel-item:hover {
+    background-color: #1e1e1e; /* Darker background on hover */
+}
+
+.channel-logo {
+    width: 50px; /* Adjust as needed */
+    height: 50px; /* Adjust as needed */
+    border-radius: 50%; /* Rounded edges for logos */
+    margin-right: 10px;
+    transition: transform 0.2s; /* Animation for interaction */
+}
+
+.channel-logo:hover {
+    transform: scale(1.1); /* Slightly enlarge logo on hover */
+}
+
+.channel-name {
+    flex-grow: 1; /* Allow name to take available space */
+}
+
+button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
 }
