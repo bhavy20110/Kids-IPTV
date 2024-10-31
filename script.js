@@ -1,73 +1,71 @@
-fetch('M3UPlus-Playlist-20241019222427.m3u')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text();
-    })
-    .then(data => {
-        const channels = parseM3U(data);
-        console.log('Parsed Channels:', channels); // Log parsed channels for debugging
-        if (channels.length === 0) {
-            console.error('No channels found.');
-        }
-        displayChannels(channels);
-    })
-    .catch(error => console.error('Error fetching M3U file:', error));
+// script.js
+document.addEventListener("DOMContentLoaded", () => {
+    const video = document.getElementById("video");
+    const channelList = document.getElementById("channel-list");
+    const m3uUrl = "M3UPlus-Playlist-20241019222427.m3u"; // Replace with the path to your M3U file if needed
 
-function parseM3U(data) {
-    const lines = data.split('\n');
-    const channels = [];
-    let currentChannel = {};
+    // Fetch the M3U playlist
+    fetch(m3uUrl)
+        .then(response => response.text())
+        .then(data => {
+            const channels = parseM3U(data);
+            populateChannelList(channels);
+        })
+        .catch(error => {
+            console.error("Error fetching the M3U playlist:", error);
+        });
 
-    lines.forEach(line => {
-        line = line.trim();
-        if (line.startsWith('#EXTINF:')) {
-            if (currentChannel.name) {
-                channels.push(currentChannel); // Push the last channel
-                currentChannel = {}; // Reset for next channel
+    // Parse the M3U playlist
+    function parseM3U(data) {
+        const lines = data.split("\n");
+        const channels = [];
+        let currentChannel = {};
+
+        for (let line of lines) {
+            line = line.trim();
+            if (line.startsWith("#EXTINF:")) {
+                // Extract channel name and duration
+                const match = line.match(/#EXTINF:-1,(.*)/);
+                if (match) {
+                    currentChannel.name = match[1];
+                }
+            } else if (line && !line.startsWith("#")) {
+                // It's a URL line
+                currentChannel.url = line;
+                channels.push(currentChannel);
+                currentChannel = {}; // Reset for the next channel
             }
-            const nameMatch = line.match(/,(.+)$/);
-            if (nameMatch) {
-                currentChannel.name = nameMatch[1].trim(); // Trim whitespace
-            }
-        } else if (line && !line.startsWith('#')) {
-            currentChannel.url = line.trim(); // Trim whitespace
-            currentChannel.logo = getLogo(currentChannel.name); // Get logo based on name
         }
-    });
 
-    if (currentChannel.name) {
-        channels.push(currentChannel); // Push the last channel if exists
+        return channels;
     }
 
-    return channels;
-}
+    // Populate the channel list
+    function populateChannelList(channels) {
+        channels.forEach((channel) => {
+            const li = document.createElement("li");
+            li.textContent = channel.name;
+            li.addEventListener("click", () => playChannel(channel.url));
+            channelList.appendChild(li);
+        });
+    }
 
-function getLogo(channelName) {
-    const logos = {
-        'DISNEY INDIA': 'path/to/disney_logo.png',
-        'CNN': 'path/to/cnn_logo.png',
-        // Add more channels and their logos here
-    };
-
-    return logos[channelName] || 'path/to/default_logo.png'; // Default logo if not found
-}
-
-function displayChannels(channels) {
-    const container = document.getElementById('channel-container');
-    container.innerHTML = ''; // Clear the container before displaying
-    channels.forEach(channel => {
-        const channelDiv = document.createElement('div');
-        channelDiv.classList.add('channel');
-        channelDiv.innerHTML = `
-            <img src="${channel.logo}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
-            <p>${channel.name}</p>
-        `;
-        container.appendChild(channelDiv);
-    });
-}
-
-function playStream(url, name) {
-    window.location.href = `player.html?url=${url}&name=${name}`; // Navigate to player page
-}
+    // Play the selected channel
+    function playChannel(url) {
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play();
+            });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = url;
+            video.addEventListener("loadedmetadata", () => {
+                video.play();
+            });
+        } else {
+            console.error("This browser does not support HLS.");
+        }
+    }
+});
