@@ -1,45 +1,34 @@
+/* styles.css */
 body {
     background-color: #121212;
     color: #ffffff;
     font-family: Arial, sans-serif;
-    text-align: center;
-}
-
-.channel-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
-#channels {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    width: 90%;
 }
 
 .channel {
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    background-color: #1f1f1f;
+    margin: 10px;
     padding: 10px;
-    border-radius: 15px;
+    background-color: #333333;
+    border-radius: 10px;
     transition: transform 0.2s;
 }
 
 .channel:hover {
     transform: scale(1.05);
+    background-color: #444444;
 }
 
-.channel-logo {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
+.logo {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+    border-radius: 50%;
 }
 
-video {
-    width: 100%;
-    max-width: 800px;
-    border-radius: 10px;
+.channel-name {
+    font-size: 1.2em;
+    color: #ffffff;
 }
