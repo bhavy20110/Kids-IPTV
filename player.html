@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="player-container">
+        <h1 id="channel-name"></h1>
+        <video id="video-player" controls autoplay></video>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoUrl = urlParams.get('url');
+        const channelName = decodeURIComponent(urlParams.get('name'));
+
+        document.getElementById('channel-name').innerText = channelName;
+        const videoPlayer = document.getElementById('video-player');
+        videoPlayer.src = videoUrl;
+    </script>
+</body>
+</html>
