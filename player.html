@@ -5,14 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Include hls.js library -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
     <div class="container">
         <h1 id="channel-name">Live Stream</h1>
-        <video id="video" controls style="width: 100%; max-width: 800px;"></video>
+        <video id="video" controls style="width: 100%; max-height: 80vh;"></video>
     </div>
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamUrl = urlParams.get('url');
+            const channelName = decodeURIComponent(urlParams.get('name'));
+
+            document.getElementById('channel-name').textContent = channelName; // Set the channel name
+
+            // Initialize video player
+            const video = document.getElementById('video');
+
+            function playStream(url) {
+                if (url.endsWith('.m3u8')) {
+                    if (Hls.isSupported()) {
+                        const hls = new Hls();
+                        hls.loadSource(url);
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                            video.play();
+                        });
+                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = url;
+                        video.addEventListener('loadedmetadata', function () {
+                            video.play();
+                        });
+                    } else {
+                        console.error('HLS not supported in this browser');
+                    }
+                } else if (url.endsWith('.mpd')) {
+                    video.src = url; // Directly set the source for DASH
+                    video.addEventListener('loadedmetadata', function () {
+                        video.play();
+                    });
+                } else {
+                    console.error('Unsupported stream format: ' + url);
+                }
+            }
+
+            // Start streaming the selected channel
+            playStream(streamUrl);
+        });
+    </script>
 </body>
 </html>
