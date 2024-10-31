@@ -52,7 +52,6 @@ function getLogo(channelName) {
     };
     return logos[channelName] || 'path/to/default_logo.png'; // Default logo if not found
 }
-
 function displayChannels(channels) {
     const container = document.getElementById('channel-list'); // Updated ID
     container.innerHTML = ''; // Clear previous channels
@@ -69,6 +68,7 @@ function displayChannels(channels) {
             container.appendChild(channelDiv);
         });
     }
+}
 }
 
 function playStream(url, name) {
