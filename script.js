@@ -1,12 +1,6 @@
 fetch('M3UPlus-Playlist-20241019222427.m3u')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
-        }
-        return response.text();
-    })
+    .then(response => response.text())
     .then(data => {
-        console.log('Fetched M3U Data:', data); // Debugging: Check if data is fetched correctly
         const channels = parseM3U(data);
         console.log('Parsed Channels:', channels); // Debugging
         displayChannels(channels);
@@ -18,7 +12,7 @@ function parseM3U(data) {
     const channels = [];
     let currentChannel = {};
 
-    lines.forEach((line, index) => {
+    lines.forEach(line => {
         line = line.trim();
         if (line.startsWith('#EXTINF:')) {
             if (currentChannel.name) {
@@ -28,7 +22,6 @@ function parseM3U(data) {
             const nameMatch = line.match(/,(.+)$/);
             if (nameMatch) {
                 currentChannel.name = nameMatch[1].trim(); // Channel name
-                console.log(`Found Channel: ${currentChannel.name}`); // Debugging
             }
         } else if (line && !line.startsWith('#')) {
             currentChannel.url = line.trim(); // Channel URL
@@ -40,7 +33,6 @@ function parseM3U(data) {
         channels.push(currentChannel); // Save the last channel if exists
     }
 
-    console.log(`Total Channels Parsed: ${channels.length}`); // Debugging
     return channels;
 }
 
@@ -52,6 +44,7 @@ function getLogo(channelName) {
     };
     return logos[channelName] || 'path/to/default_logo.png'; // Default logo if not found
 }
+
 function displayChannels(channels) {
     const container = document.getElementById('channel-list'); // Updated ID
     container.innerHTML = ''; // Clear previous channels
@@ -68,7 +61,6 @@ function displayChannels(channels) {
             container.appendChild(channelDiv);
         });
     }
-}
 }
 
 function playStream(url, name) {
