@@ -1,4 +1,3 @@
-// Fetch the M3U playlist
 fetch('M3UPlus-Playlist-20241019222427.m3u')
     .then(response => response.text())
     .then(data => {
@@ -47,7 +46,7 @@ function getLogo(channelName) {
 }
 
 function displayChannels(channels) {
-    const container = document.getElementById('channel-list');
+    const container = document.getElementById('channel-list'); // Updated ID
     container.innerHTML = ''; // Clear previous channels
     if (channels.length === 0) {
         container.innerHTML = '<p>No channels found</p>'; // Message if no channels
@@ -65,51 +64,5 @@ function displayChannels(channels) {
 }
 
 function playStream(url, name) {
-    console.log(`Attempting to play stream: ${url} for channel: ${name}`); // Log the URL
     window.location.href = `player.html?url=${url}&name=${name}`; // Navigate to player page
 }
-
-// Functionality for player.html
-// This part will be executed when player.html is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const streamUrl = urlParams.get('url');
-    const channelName = decodeURIComponent(urlParams.get('name'));
-
-    document.getElementById('channel-name').textContent = channelName; // Set the channel name
-
-    // Initialize video player
-    const video = document.getElementById('video');
-
-    function playStream(url) {
-        // Check if the URL ends with .m3u8 or .mpd
-        if (url.endsWith('.m3u8')) {
-            // Handle .m3u8 stream with hls.js
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    video.play();
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Native HLS support for Safari
-                video.src = url;
-                video.addEventListener('loadedmetadata', function () {
-                    video.play();
-                });
-            }
-        } else if (url.endsWith('.mpd')) {
-            // Handle .mpd stream (DASH)
-            video.src = url; // Directly set the source for DASH
-            video.addEventListener('loadedmetadata', function () {
-                video.play();
-            });
-        } else {
-            console.error('Unsupported stream format: ' + url);
-        }
-    }
-
-    // Start streaming the selected channel
-    playStream(streamUrl);
-});
