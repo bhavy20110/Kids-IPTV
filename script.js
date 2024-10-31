@@ -46,7 +46,7 @@ function getLogo(channelName) {
 }
 
 function displayChannels(channels) {
-    const container = document.getElementById('channel-list'); // Updated ID
+    const container = document.getElementById('channel-list');
     container.innerHTML = ''; // Clear previous channels
     if (channels.length === 0) {
         container.innerHTML = '<p>No channels found</p>'; // Message if no channels
