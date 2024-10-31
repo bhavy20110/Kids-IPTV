@@ -4,31 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css">
+    <style>
+        #video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1 id="stream-title">Stream Player</h1>
-        <video id="video" class="video-js" controls preload="auto" width="640" height="264" data-setup='{}'>
-            <source src="" type="application/x-mpegURL">
-            <p class="vjs-no-js">
-                To view this video please enable JavaScript, and consider upgrading to a
-                web browser that
-                <a href="https://www.google.com/chrome/">supports HTML5 video</a>
-            </p>
-        </video>
+        <video id="video" controls></video>
     </div>
-    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('url');
         const streamName = urlParams.get('name');
         document.getElementById('stream-title').innerText = streamName || 'Unknown Stream';
         
-        const videoPlayer = videojs('video');
-        videoPlayer.src({ src: streamUrl, type: 'application/x-mpegURL' });
-        videoPlayer.play();
+        const video = document.getElementById('video');
+
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = streamUrl;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
+            });
+        } else {
+            alert('This browser does not support HLS.');
+        }
     </script>
 </body>
 </html>
