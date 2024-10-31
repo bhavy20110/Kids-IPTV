@@ -2,28 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player</title>
+    <title>Channel Player</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Now Playing</h1>
-    </header>
-    <video id="videoPlayer" controls autoplay></video>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const streamUrl = urlParams.get('url');
-        const videoPlayer = document.getElementById('videoPlayer');
-        if (streamUrl) {
-            videoPlayer.src = streamUrl;
-            videoPlayer.play().catch(error => {
-                console.error('Error: Unable to play the stream.', error);
-                alert('Unable to play the stream. Please check the link.');
-            });
-        } else {
-            alert('No stream URL provided.');
-        }
-    </script>
+    <h1 id="channel-name">Playing...</h1>
+    <video id="video" controls autoplay></video>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="player.js"></script>
 </body>
 </html>
