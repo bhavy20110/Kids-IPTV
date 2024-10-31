@@ -65,6 +65,7 @@ function displayChannels(channels) {
 }
 
 function playStream(url, name) {
+    console.log(`Attempting to play stream: ${url} for channel: ${name}`); // Log the URL
     window.location.href = `player.html?url=${url}&name=${name}`; // Navigate to player page
 }
 
