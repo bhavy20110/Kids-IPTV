@@ -1,56 +1,36 @@
-const m3uFileUrl = 'M3UPlus-Playlist-20241019222427.m3u';
-const channelList = document.getElementById('channel-list');
+const channels = [
+    {
+        name: "Channel 1",
+        logo: "path_to_logo1.png",
+        url: "http://path_to_stream1.m3u8"
+    },
+    {
+        name: "Channel 2",
+        logo: "path_to_logo2.png",
+        url: "http://path_to_stream2.m3u8"
+    }
+];
 
-fetch(m3uFileUrl)
-    .then(response => response.text())
-    .then(data => {
-        const channels = parseM3U(data);
-        displayChannels(channels);
-    })
-    .catch(error => console.error('Error fetching M3U file:', error));
+const channelsDiv = document.getElementById("channels");
+const videoPlayer = videojs('video');
 
-function parseM3U(data) {
-    const lines = data.split('\n');
-    const channels = [];
-    let currentChannel = {};
+channels.forEach(channel => {
+    const channelDiv = document.createElement('div');
+    const logo = document.createElement('img');
+    const name = document.createElement('div');
 
-    lines.forEach(line => {
-        if (line.startsWith('#EXTINF:')) {
-            const parts = line.split(',');
-            currentChannel = {
-                name: parts[1].trim(),
-                url: lines[lines.indexOf(line) + 1].trim(),
-            };
-            channels.push(currentChannel);
-        }
-        if (line.includes('tvg-logo')) {
-            const logoUrl = line.match(/tvg-logo="([^"]+)"/);
-            if (logoUrl) {
-                currentChannel.logo = logoUrl[1];
-            }
-        }
-    });
-    return channels;
-}
+    logo.src = channel.logo;
+    logo.classList.add('channel-logo');
+    logo.alt = channel.name;
+    logo.onclick = () => {
+        videoPlayer.src({ src: channel.url, type: 'application/x-mpegURL' });
+        videoPlayer.play();
+    };
 
-function displayChannels(channels) {
-    channels.forEach(channel => {
-        const channelDiv = document.createElement('div');
-        channelDiv.classList.add('channel');
-        
-        const channelLogo = document.createElement('img');
-        channelLogo.src = channel.logo || 'default-logo.png'; // Fallback logo
-        channelLogo.alt = channel.name;
+    name.textContent = channel.name;
+    name.classList.add('channel-name');
 
-        const channelName = document.createElement('p');
-        channelName.textContent = channel.name;
-
-        const channelLink = document.createElement('a');
-        channelLink.href = `player.html?url=${encodeURIComponent(channel.url)}`;
-        channelLink.appendChild(channelLogo);
-        channelLink.appendChild(channelName);
-        
-        channelDiv.appendChild(channelLink);
-        channelList.appendChild(channelDiv);
-    });
-}
+    channelDiv.appendChild(logo);
+    channelDiv.appendChild(name);
+    channelsDiv.appendChild(channelDiv);
+});
