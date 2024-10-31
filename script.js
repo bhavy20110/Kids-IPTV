@@ -1,36 +1,51 @@
-const channels = [
-    {
-        name: "Channel 1",
-        logo: "path_to_logo1.png",
-        url: "http://path_to_stream1.m3u8"
-    },
-    {
-        name: "Channel 2",
-        logo: "path_to_logo2.png",
-        url: "http://path_to_stream2.m3u8"
-    }
-];
+async function fetchM3U(url) {
+    const response = await fetch(url);
+    const data = await response.text();
+    return parseM3U(data);
+}
 
-const channelsDiv = document.getElementById("channels");
-const videoPlayer = videojs('video');
+function parseM3U(data) {
+    const lines = data.split('\n');
+    const streams = [];
+    let currentStream = {};
 
-channels.forEach(channel => {
-    const channelDiv = document.createElement('div');
-    const logo = document.createElement('img');
-    const name = document.createElement('div');
+    lines.forEach((line) => {
+        if (line.startsWith('#EXTM3U') || line.trim() === '') return;
+        if (line.startsWith('#EXTINF')) {
+            if (currentStream.url) {
+                streams.push(currentStream);
+            }
+            const info = line.split(',');
+            currentStream = {
+                name: info[1].trim(),
+                url: '',
+                logo: ''
+            };
+        } else if (currentStream.url === '') {
+            currentStream.url = line.trim();
+        } else if (line.startsWith('http')) {
+            currentStream.logo = line.trim();
+        }
+    });
+    if (currentStream.url) streams.push(currentStream);
+    return streams;
+}
 
-    logo.src = channel.logo;
-    logo.classList.add('channel-logo');
-    logo.alt = channel.name;
-    logo.onclick = () => {
-        videoPlayer.src({ src: channel.url, type: 'application/x-mpegURL' });
-        videoPlayer.play();
-    };
+async function initializePlayer() {
+    const streams = await fetchM3U('M3UPlus-Playlist-20241019222427.m3u');
+    const channelList = document.getElementById('channel-list');
+    streams.forEach(stream => {
+        const channelItem = document.createElement('div');
+        channelItem.className = 'channel-item';
+        channelItem.innerHTML = `
+            <a href="player.html?url=${encodeURIComponent(stream.url)}&name=${encodeURIComponent(stream.name)}">
+                <img src="${stream.logo}" alt="${stream.name}" class="channel-logo">
+                <span>${stream.name || 'Unknown Channel'}</span>
+            </a>
+        `;
+        channelList.appendChild(channelItem);
+    });
+}
 
-    name.textContent = channel.name;
-    name.classList.add('channel-name');
-
-    channelDiv.appendChild(logo);
-    channelDiv.appendChild(name);
-    channelsDiv.appendChild(channelDiv);
-});
+// Initialize player on load
+initializePlayer();
