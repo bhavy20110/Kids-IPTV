@@ -1,51 +1,64 @@
-async function fetchM3U(url) {
-    const response = await fetch(url);
-    const data = await response.text();
-    return parseM3U(data);
-}
+fetch('M3UPlus-Playlist-20241019222427.m3u')
+    .then(response => response.text())
+    .then(data => {
+        const channels = parseM3U(data);
+        displayChannels(channels);
+    })
+    .catch(error => console.error('Error fetching M3U file:', error));
 
 function parseM3U(data) {
     const lines = data.split('\n');
-    const streams = [];
-    let currentStream = {};
+    const channels = [];
+    let currentChannel = {};
 
-    lines.forEach((line) => {
-        if (line.startsWith('#EXTM3U') || line.trim() === '') return;
-        if (line.startsWith('#EXTINF')) {
-            if (currentStream.url) {
-                streams.push(currentStream);
+    lines.forEach(line => {
+        line = line.trim();
+        if (line.startsWith('#EXTINF:')) {
+            if (currentChannel.name) {
+                channels.push(currentChannel); // Push the last channel
+                currentChannel = {}; // Reset for next channel
             }
-            const info = line.split(',');
-            currentStream = {
-                name: info[1].trim(),
-                url: '',
-                logo: ''
-            };
-        } else if (currentStream.url === '') {
-            currentStream.url = line.trim();
-        } else if (line.startsWith('http')) {
-            currentStream.logo = line.trim();
+            const nameMatch = line.match(/,(.+)$/);
+            if (nameMatch) {
+                currentChannel.name = nameMatch[1];
+            }
+        } else if (line && !line.startsWith('#')) {
+            currentChannel.url = line;
+            currentChannel.logo = getLogo(currentChannel.name); // Get logo based on name
         }
     });
-    if (currentStream.url) streams.push(currentStream);
-    return streams;
+
+    if (currentChannel.name) {
+        channels.push(currentChannel); // Push the last channel if exists
+    }
+
+    return channels;
 }
 
-async function initializePlayer() {
-    const streams = await fetchM3U('M3UPlus-Playlist-20241019222427.m3u');
-    const channelList = document.getElementById('channel-list');
-    streams.forEach(stream => {
-        const channelItem = document.createElement('div');
-        channelItem.className = 'channel-item';
-        channelItem.innerHTML = `
-            <a href="player.html?url=${encodeURIComponent(stream.url)}&name=${encodeURIComponent(stream.name)}">
-                <img src="${stream.logo}" alt="${stream.name}" class="channel-logo">
-                <span>${stream.name || 'Unknown Channel'}</span>
-            </a>
+function getLogo(channelName) {
+    // You can define a mapping of channel names to logo URLs here
+    const logos = {
+        'DISNEY INDIA': 'path/to/disney_logo.png',
+        'CNN': 'path/to/cnn_logo.png',
+        // Add more channels and their logos here
+    };
+
+    return logos[channelName] || 'path/to/default_logo.png'; // Default logo if not found
+}
+
+function displayChannels(channels) {
+    const container = document.getElementById('channel-container');
+    channels.forEach(channel => {
+        const channelDiv = document.createElement('div');
+        channelDiv.classList.add('channel');
+        channelDiv.innerHTML = `
+            <img src="${channel.logo}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
+            <p>${channel.name}</p>
         `;
-        channelList.appendChild(channelItem);
+        container.appendChild(channelDiv);
     });
 }
 
-// Initialize player on load
-initializePlayer();
+function playStream(url, name) {
+    window.location.href = `player.html?url=${url}&name=${name}`; // Navigate to player page
+}
