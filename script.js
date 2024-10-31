@@ -1,6 +1,5 @@
 const m3uFileUrl = 'M3UPlus-Playlist-20241019222427.m3u';
 const channelList = document.getElementById('channel-list');
-const playerContainer = document.getElementById('player');
 
 fetch(m3uFileUrl)
     .then(response => response.text())
@@ -43,19 +42,11 @@ function displayChannels(channels) {
         channelLogo.src = channel.logo || 'default-logo.png'; // Fallback logo
         channelLogo.alt = channel.name;
         
-        channelDiv.appendChild(channelLogo);
-        channelDiv.addEventListener('click', () => playChannel(channel.url));
+        const channelLink = document.createElement('a');
+        channelLink.href = `player.html?url=${encodeURIComponent(channel.url)}`;
+        channelLink.appendChild(channelLogo);
         
+        channelDiv.appendChild(channelLink);
         channelList.appendChild(channelDiv);
-    });
-}
-
-function playChannel(url) {
-    const player = new Clappr.Player({
-        source: url,
-        parentId: '#player',
-        width: '100%',
-        height: '100%',
-        autoPlay: true,
     });
 }
