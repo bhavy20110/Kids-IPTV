@@ -1,11 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* Background color */
+    margin: 0;
+    padding: 0;
+}
+
 .container {
-    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center; /* Center text */
+}
+
+h1 {
+    color: #333; /* Header color */
 }
 
 .channel {
     display: inline-block; /* Allow channel divs to sit side by side */
     margin: 10px; /* Spacing between channels */
     cursor: pointer; /* Change cursor on hover */
+    border: 1px solid #ccc; /* Optional: Border for channels */
+    border-radius: 8px; /* Optional: Rounded corners */
+    background: #fff; /* Background for channels */
+    padding: 10px; /* Padding around the content */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Shadow effect */
 }
 
 .channel-logo {
@@ -18,4 +37,5 @@
 .channel p {
     margin: 0; /* Remove default margin */
     font-size: 14px; /* Adjust font size as needed */
+    color: #555; /* Text color */
 }
