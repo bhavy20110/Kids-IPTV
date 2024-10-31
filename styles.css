@@ -1,34 +1,36 @@
-/* styles.css */
 body {
-    background-color: #121212;
-    color: #ffffff;
+    background-color: #1e1e1e;
+    color: white;
     font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    margin: 20px 0;
+}
+
+.channel-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
 .channel {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    margin: 10px;
-    padding: 10px;
-    background-color: #333333;
+    background-color: #282828;
     border-radius: 10px;
-    transition: transform 0.2s;
+    padding: 10px;
+    transition: transform 0.3s;
+    cursor: pointer;
 }
 
 .channel:hover {
     transform: scale(1.05);
-    background-color: #444444;
 }
 
-.logo {
-    width: 50px;
-    height: 50px;
-    margin-right: 15px;
-    border-radius: 50%;
-}
-
-.channel-name {
-    font-size: 1.2em;
-    color: #ffffff;
+.channel img {
+    border-radius: 10px;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
 }
