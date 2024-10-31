@@ -15,19 +15,22 @@ fetch('M3UPlus-Playlist-20241019222427.m3u')
             const lines = channel.split('\n');
             const info = lines[0];
             const link = lines[1];
+            const logoUrl = info.match(/logo="([^"]+)"/)?.[1]; // Extract logo URL
 
             if (link) {
                 const name = info.split(',')[1]?.trim() || 'Unknown Channel';
 
                 const li = document.createElement('li');
-                li.innerText = name;
-                li.onclick = () => {
-                    window.location.href = `player.html?url=${encodeURIComponent(link.trim())}&name=${encodeURIComponent(name)}`;
-                };
+                li.innerHTML = `
+                    <img src="${logoUrl || 'default-logo.png'}" alt="${name} Logo" class="channel-logo">
+                    <a href="player.html?url=${encodeURIComponent(link)}&name=${encodeURIComponent(name)}">
+                        ${name}
+                    </a>
+                `;
                 channelList.appendChild(li);
             }
         });
     })
     .catch(error => {
-        console.error('Error fetching M3U file:', error);
+        console.error('There was a problem with the fetch operation:', error);
     });
