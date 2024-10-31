@@ -1,29 +1,53 @@
-async function loadChannels() {
+// Function to fetch channels from the M3U file
+async function fetchChannels() {
     const response = await fetch('M3UPlus-Playlist-20241019222427.m3u');
     const data = await response.text();
-    const lines = data.split('\n');
+    const channels = parseM3U(data);
+    loadChannels(channels);
+}
 
-    const channelList = document.getElementById('channel-list');
+// Function to parse M3U file content
+function parseM3U(data) {
+    const lines = data.split('\n');
+    const channels = [];
     let currentChannel = {};
 
     lines.forEach(line => {
         if (line.startsWith('#EXTINF:')) {
-            const channelInfo = line.split(',');
-            currentChannel.name = channelInfo[1].trim();
-        } else if (line.startsWith('http')) {
+            const parts = line.split(',');
+            const name = parts[1].trim();
+            currentChannel = { name };
+        } else if (line.trim()) {
             currentChannel.url = line.trim();
-            const logo = currentChannel.name.toLowerCase().replace(/ /g, '-') + '.png'; // Adjust logo naming
-
-            const channelItem = document.createElement('div');
-            channelItem.className = 'channel-item';
-            channelItem.innerHTML = `
-                <img src="logos/${logo}" alt="${currentChannel.name} Logo" onerror="this.onerror=null; this.src='logos/default.png';" />
-                <a href="player.html?url=${encodeURIComponent(currentChannel.url)}&name=${encodeURIComponent(currentChannel.name)}">${currentChannel.name}</a>
-            `;
-            channelList.appendChild(channelItem);
-            currentChannel = {}; // Reset for next channel
+            channels.push(currentChannel);
         }
+    });
+
+    return channels;
+}
+
+// Load channels into the GUI
+function loadChannels(channels) {
+    const channelList = document.getElementById('channelList');
+    channelList.innerHTML = '';
+
+    channels.forEach(channel => {
+        const logo = channel.name.toLowerCase().replace(/ /g, '-') + '.png';
+        const channelItem = document.createElement('div');
+        channelItem.className = 'channel-item';
+        channelItem.innerHTML = `
+            <img src="logos/${logo}" alt="${channel.name} logo" class="channel-logo" />
+            <span class="channel-name">${channel.name}</span>
+            <button onclick="playStream('${encodeURIComponent(channel.url)}', '${channel.name}')">Play</button>
+        `;
+        channelList.appendChild(channelItem);
     });
 }
 
-loadChannels();
+// Function to play the selected stream
+function playStream(url, name) {
+    window.location.href = `player.html?url=${url}&name=${name}`;
+}
+
+// Initialize fetching channels on page load
+window.onload = fetchChannels;
