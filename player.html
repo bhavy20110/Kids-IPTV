@@ -8,23 +8,8 @@
 </head>
 <body>
     <div class="player-container">
-        <h1 id="channel-name"></h1>
-        <video id="video-player" controls autoplay></video>
-        <a href="index.html" class="back-button">Back to Channels</a>
+        <video id="videoPlayer" controls autoplay></video>
     </div>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoUrl = urlParams.get('url');
-        const channelName = decodeURIComponent(urlParams.get('name'));
-
-        document.getElementById('channel-name').innerText = channelName;
-        const videoPlayer = document.getElementById('video-player');
-        videoPlayer.src = videoUrl;
-
-        // Check if video can be played
-        videoPlayer.addEventListener('error', function() {
-            alert('Error: Unable to play the stream. Please check the link.');
-        });
-    </script>
+    <script src="player.js"></script>
 </body>
 </html>
