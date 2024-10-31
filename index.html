@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPTV Player</title>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
+    <title>Channel Player</title>
+    <style>
+        body { background-color: #121212; color: #ffffff; }
+        .channel-container { display: flex; flex-wrap: wrap; }
+        .channel-logo { border-radius: 10px; cursor: pointer; width: 100px; margin: 10px; }
+        .channel-name { text-align: center; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>IPTV Player</h1>
-    </header>
-    <main>
-        <div id="channel-list"></div>
-    </main>
+    <h1>Channel Player</h1>
+    <div id="channels" class="channel-container"></div>
+    <video id="video" class="video-js vjs-default-skin" controls preload="auto" width="640" height="264"></video>
 
+    <script src="https://vjs.zencdn.net/7.15.4/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls/dist/videojs-contrib-hls.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
