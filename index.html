@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
-    <title>Channel Player</title>
-    <style>
-        body { background-color: #121212; color: #ffffff; }
-        .channel-container { display: flex; flex-wrap: wrap; }
-        .channel-logo { border-radius: 10px; cursor: pointer; width: 100px; margin: 10px; }
-        .channel-name { text-align: center; }
-    </style>
+    <title>Stream Player</title>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Channel Player</h1>
-    <div id="channels" class="channel-container"></div>
-    <video id="video" class="video-js vjs-default-skin" controls preload="auto" width="640" height="264"></video>
-
-    <script src="https://vjs.zencdn.net/7.15.4/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls/dist/videojs-contrib-hls.min.js"></script>
+    <div class="container">
+        <h1>Live Stream Channels</h1>
+        <div id="channel-list"></div>
+        <video id="video" class="video-js" controls preload="auto" width="640" height="264" data-setup='{}'>
+            <source src="" type="application/x-mpegURL">
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a
+                web browser that
+                <a href="https://www.google.com/chrome/">supports HTML5 video</a>
+            </p>
+        </video>
+    </div>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
