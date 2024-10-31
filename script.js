@@ -1,8 +1,16 @@
 fetch('M3UPlus-Playlist-20241019222427.m3u')
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    })
     .then(data => {
         const channels = parseM3U(data);
         console.log('Parsed Channels:', channels); // Log parsed channels for debugging
+        if (channels.length === 0) {
+            console.error('No channels found.');
+        }
         displayChannels(channels);
     })
     .catch(error => console.error('Error fetching M3U file:', error));
