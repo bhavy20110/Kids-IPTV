@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -40,14 +41,14 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="video" style="width: 100%;" controls playsinline></video>
+        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
     <script>
-        // Get the stream URL and channel name from URL parameters
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
@@ -59,27 +60,25 @@
             const logEntry = document.createElement('p');
             logEntry.innerText = message;
             logContainer.appendChild(logEntry);
-            console.log(message);  // Log to console for debugging
         };
 
         const errorMessage = document.getElementById('error-message');
 
-        // Function to play with Shaka Player
-        function playWithShaka(streamUrl) {
-            const video = document.getElementById('video');
-            const shakaPlayer = new shaka.Player(video);
+        // Initialize Video.js player
+        const player = videojs('video');
 
-            shakaPlayer.load(streamUrl).then(() => {
-                log('Shaka Player: Stream loaded successfully, starting playback.');
-                video.play();
-            }).catch(error => {
-                log('Shaka Player: Error encountered, unable to play the stream: ' + error);
-                errorMessage.innerText = 'Error: Unable to play the stream.';
+        player.ready(() => {
+            player.src({
+                src: streamUrl,
+                type: 'application/x-mpegURL'
             });
-        }
+            player.play();
 
-        // Start playing the stream using Shaka Player
-        playWithShaka(streamUrl);
+            player.on('error', () => {
+                errorMessage.innerText = 'Error: Unable to play the stream.';
+                log('Error encountered while trying to play the stream.');
+            });
+        });
     </script>
 </body>
 </html>
