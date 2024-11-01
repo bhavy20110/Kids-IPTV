@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css">
     <style>
         body {
             background-color: #121212;
@@ -50,6 +49,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -83,17 +83,12 @@
                 if (data.fatal) {
                     switch (data.fatal) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
-                            log('HLS.js: Network error encountered.');
-                            break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
-                            log('HLS.js: Media error encountered.');
-                            break;
                         case Hls.ErrorTypes.OTHER_ERROR:
-                            log('HLS.js: Other error encountered.');
+                            log('HLS.js: Error encountered, switching to Video.js...');
+                            playWithVideoJS(streamUrl);
                             break;
                     }
-                    log('Switching to Video.js...');
-                    playWithVideoJS(streamUrl);
                 }
             });
         } else {
@@ -109,24 +104,21 @@
             player.src({ src: streamUrl, type: 'application/x-mpegURL' });
 
             player.on('error', function() {
-                log('Video.js: Error encountered, switching to MediaElement.js...');
-                playWithMediaElement(streamUrl);
+                log('Video.js: Error encountered, switching to Shaka Player...');
+                playWithShaka(streamUrl);
             });
         }
 
-        // Function to attempt playing with MediaElement.js
-        function playWithMediaElement(streamUrl) {
+        // Function to attempt playing with Shaka Player
+        function playWithShaka(streamUrl) {
             const video = document.getElementById('video');
+            const shakaPlayer = new shaka.Player(video);
 
-            const player = new MediaElementPlayer(video, {
-                success: function(mediaElement) {
-                    log('MediaElement.js: Player initialized, starting playback.');
-                    mediaElement.setSrc(streamUrl);
-                    mediaElement.play();
-                },
-                error: function() {
-                    errorMessage.innerText = 'Error: Unable to play the stream.';
-                }
+            shakaPlayer.load(streamUrl).then(() => {
+                log('Shaka Player: Stream loaded successfully, starting playback.');
+            }).catch(error => {
+                log('Shaka Player: Error encountered, unable to play the stream.');
+                errorMessage.innerText = 'Error: Unable to play the stream.';
             });
         }
     </script>
