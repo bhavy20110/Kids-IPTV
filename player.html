@@ -5,41 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Include Video.js CSS -->
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+    <style>
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <video id="video-player" controls autoplay></video>
+        <h1 id="channel-name"></h1>
+        <video id="video-player" class="video-js vjs-default-skin" controls autoplay></video>
+        <div id="error-message" class="error-message"></div>
     </div>
-
-    <!-- Include HLS.js for HLS playback -->
+    <!-- Include HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
+    <!-- Include Video.js JS -->
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const url = decodeURIComponent(urlParams.get('url'));
-        const name = decodeURIComponent(urlParams.get('name'));
+        const params = new URLSearchParams(window.location.search);
+        const url = params.get('url');
+        const name = params.get('name');
 
-        document.title = name;
-        const video = document.getElementById('video-player');
+        document.getElementById('channel-name').textContent = name || 'Stream Player';
 
-        if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play();
-            });
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                console.error("HLS.js error:", data);
-                alert("Stream error. This channel may not support HLS playback.");
-            });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = url;
-            video.play();
-        } else {
-            console.error("HLS is not supported by this browser.");
-            alert("HLS is not supported by this browser.");
+        const videoPlayer = document.getElementById('video-player');
+        const errorMessage = document.getElementById('error-message');
+
+        // Function to play using HLS.js
+        function playWithHls(url) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(decodeURIComponent(url));
+                hls.attachMedia(videoPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoPlayer.play();
+                });
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch (data.fatal) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                            case Hls.ErrorTypes.OTHER_ERROR:
+                                // Try Video.js if HLS fails
+                                fallbackToVideoJs(decodeURIComponent(url));
+                                break;
+                        }
+                    }
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                // Native HLS support
+                videoPlayer.src = decodeURIComponent(url);
+                videoPlayer.addEventListener('loadedmetadata', () => {
+                    videoPlayer.play();
+                });
+            } else {
+                errorMessage.textContent = 'Your browser does not support HLS.';
+            }
         }
+
+        // Function to fallback to Video.js
+        function fallbackToVideoJs(url) {
+            errorMessage.textContent = 'Attempting to play with Video.js...';
+            videoPlayer.src = decodeURIComponent(url);
+            videoPlayer.play().catch(error => {
+                errorMessage.textContent = 'Error playing the stream. Please check the URL.';
+            });
+        }
+
+        // Start playing the stream
+        playWithHls(url);
     </script>
 </body>
 </html>
