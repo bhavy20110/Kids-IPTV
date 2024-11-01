@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shaka Player Stream</title>
+    <title>Stream Player</title>
     <style>
         body {
             background-color: #121212;
@@ -47,6 +47,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
     <script>
+        // Get the stream URL and channel name from URL parameters
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
@@ -77,7 +78,7 @@
             });
         }
 
-        // Start playing the stream
+        // Start playing the stream using Shaka Player
         playWithShaka(streamUrl);
     </script>
 </body>
