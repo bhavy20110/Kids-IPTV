@@ -20,12 +20,16 @@ function parseM3U(data) {
                 currentChannel = {}; // Reset for the next channel
             }
             const nameMatch = line.match(/,(.+)$/);
+            const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+
             if (nameMatch) {
                 currentChannel.name = nameMatch[1].trim(); // Channel name
             }
+            if (logoMatch) {
+                currentChannel.logo = logoMatch[1]; // Channel logo URL
+            }
         } else if (line && !line.startsWith('#')) {
             currentChannel.url = line.trim(); // Channel URL
-            currentChannel.logo = getLogo(currentChannel.name); // Get logo
         }
     });
 
@@ -34,15 +38,6 @@ function parseM3U(data) {
     }
 
     return channels;
-}
-
-function getLogo(channelName) {
-    const logos = {
-        'DISNEY INDIA': 'path/to/disney_logo.png',
-        'CNN': 'path/to/cnn_logo.png',
-        // Add more channel names and their corresponding logo paths
-    };
-    return logos[channelName] || 'path/to/default_logo.png'; // Default logo if not found
 }
 
 function displayChannels(channels) {
@@ -55,7 +50,7 @@ function displayChannels(channels) {
             const channelDiv = document.createElement('div');
             channelDiv.classList.add('channel');
             channelDiv.innerHTML = `
-                <img src="${channel.logo}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
+                <img src="${channel.logo || 'path/to/default_logo.png'}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
                 <p>${channel.name}</p>
             `;
             container.appendChild(channelDiv);
