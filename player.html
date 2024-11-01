@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212; /* Dark background */
@@ -41,7 +42,7 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="video" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <video id="video" class="video-js" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
@@ -49,6 +50,8 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -95,7 +98,7 @@
                             break;
                     }
 
-                    // Try using Plyr directly if HLS fails
+                    // Try using Plyr player for playback if HLS fails
                     log('HLS.js: Switching to Plyr player for playback.');
                     plyr.source = {
                         type: 'video',
@@ -109,7 +112,6 @@
                 }
             });
         } else {
-            // Fallback if HLS.js is not supported
             log('HLS.js not supported, trying Plyr player directly.');
             plyr.source = {
                 type: 'video',
@@ -134,12 +136,38 @@
 
             dashPlayer.on(dashjs.MediaPlayer.events.ERROR, function (e) {
                 log(`DASH.js: Error occurred - ${e.message}`);
-                errorMessage.innerText = 'Playback failed with DASH player. Please check the stream URL or try another link.';
+                errorMessage.innerText = 'Playback failed with DASH player. Trying another HLS player...';
+                tryAnotherHlsPlayer(url);
             });
 
             dashPlayer.on(dashjs.MediaPlayer.events.MANIFEST_PARSED, function () {
                 log('DASH.js: Manifest loaded, starting playback.');
                 plyr.play();
+            });
+        }
+
+        function tryAnotherHlsPlayer(url) {
+            // Create Video.js instance with HLS support
+            const videoElement = document.createElement('video');
+            videoElement.className = 'video-js';
+            videoElement.controls = true;
+            videoElement.style.width = '100%';
+            document.getElementById('videoContainer').appendChild(videoElement);
+            const videoJsPlayer = videojs(videoElement);
+
+            videoJsPlayer.src({
+                src: url,
+                type: 'application/x-mpegURL',
+            });
+
+            videoJsPlayer.on('error', function () {
+                log('Video.js: Error occurred. Unable to play the stream.');
+                errorMessage.innerText = 'Playback failed with Video.js. Please check the stream URL or try another link.';
+            });
+
+            videoJsPlayer.on('ready', function () {
+                log('Video.js: Ready to play, starting playback.');
+                videoJsPlayer.play();
             });
         }
     </script>
