@@ -1,117 +1,102 @@
-function fetchPlaylist() {
-    fetch('M3UPlus-Playlist-20241019222427.m3u')
-        .then(response => response.text())
-        .then(data => {
-            const channels = parseM3U(data);
+document.addEventListener('DOMContentLoaded', function() {
+    const channelContainer = document.getElementById('channel-container');
+    const videoElement = document.getElementById('video-player');
+    let player = null; // Initialize player variable for Video.js fallback
+
+    // Function to fetch and parse M3U playlist
+    async function loadChannels() {
+        try {
+            const response = await fetch('path/to/your.m3u'); // Replace with your actual M3U file path
+            const m3uText = await response.text();
+            const channels = parseM3U(m3uText);
             displayChannels(channels);
-        })
-        .catch(error => console.error('Error fetching M3U file:', error));
-}
+        } catch (error) {
+            console.error('Error loading channels:', error);
+        }
+    }
 
-function parseM3U(data) {
-    const lines = data.split('\n');
-    const channels = [];
-    let currentChannel = {};
+    // Function to parse M3U text and extract channel info
+    function parseM3U(m3uText) {
+        const channels = [];
+        const lines = m3uText.split('\n');
+        let currentChannel = {};
 
-    lines.forEach(line => {
-        line = line.trim();
-        if (line.startsWith('#EXTINF:')) {
-            if (currentChannel.name) {
+        lines.forEach(line => {
+            line = line.trim();
+
+            if (line.startsWith('#EXTINF')) {
+                const nameMatch = line.match(/,(.*)$/);
+                if (nameMatch) {
+                    currentChannel.name = nameMatch[1];
+                }
+                const logoMatch = line.match(/tvg-logo="(.*?)"/);
+                if (logoMatch) {
+                    currentChannel.logo = logoMatch[1];
+                }
+            } else if (line && !line.startsWith('#')) {
+                currentChannel.url = line;
                 channels.push(currentChannel);
                 currentChannel = {};
             }
-            const nameMatch = line.match(/,(.+)$/);
-            if (nameMatch) currentChannel.name = nameMatch[1].trim();
-        } else if (line && !line.startsWith('#')) {
-            currentChannel.url = line.trim();
-            currentChannel.logo = parseLogo(line); // Extract logo if available
+        });
+        return channels;
+    }
+
+    // Function to display channels in the UI
+    function displayChannels(channels) {
+        channelContainer.innerHTML = ''; // Clear any existing channels
+        channels.forEach(channel => {
+            const channelDiv = document.createElement('div');
+            channelDiv.classList.add('channel');
+            channelDiv.innerHTML = `
+                <img src="${channel.logo || 'default-logo.png'}" alt="${channel.name}" class="channel-logo">
+                <p>${channel.name}</p>
+            `;
+            channelDiv.addEventListener('click', () => playChannel(channel.url));
+            channelContainer.appendChild(channelDiv);
+        });
+    }
+
+    // Function to play the selected channel
+    function playChannel(url) {
+        // Destroy existing Video.js player if it exists
+        if (player) {
+            player.dispose();
+            player = null;
         }
-    });
 
-    if (currentChannel.name) channels.push(currentChannel);
-
-    return channels;
-}
-
-function parseLogo(line) {
-    const logoMatch = line.match(/tvg-logo="(.+?)"/);
-    return logoMatch ? logoMatch[1] : 'path/to/default_logo.png';
-}
-
-async function unshortenURL(url) {
-    try {
-        const response = await fetch(url, {
-            method: 'HEAD',
-            mode: 'no-cors',
-            redirect: 'follow',
-        });
-        return response.url || url;
-    } catch (error) {
-        console.warn(`Failed to unshorten URL ${url}:`, error);
-        return url; // If unshortening fails, return the original URL
+        // Check if Hls.js is supported and try playing
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(videoElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                videoElement.play();
+            });
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    hls.destroy();
+                    fallbackToVideoJs(url);
+                }
+            });
+        } else {
+            // If Hls.js is not supported, try Video.js as fallback
+            fallbackToVideoJs(url);
+        }
     }
-}
 
-async function displayChannels(channels) {
-    const container = document.getElementById('channel-container');
-    container.innerHTML = '';
-
-    for (const channel of channels) {
-        const unshortenedURL = await unshortenURL(channel.url);
-
-        const channelDiv = document.createElement('div');
-        channelDiv.classList.add('channel');
-        channelDiv.innerHTML = `
-            <img src="${channel.logo}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(unshortenedURL)}', '${encodeURIComponent(channel.name)}')">
-            <p>${channel.name}</p>
-        `;
-        container.appendChild(channelDiv);
-    }
-}
-
-function playStream(url, name) {
-    const decodedURL = decodeURIComponent(url);
-    const videoElement = document.getElementById('video-player');
-    videoElement.src = ''; // Reset src to avoid conflicts
-    videoElement.pause();
-
-    if (Hls.isSupported()) {
-        console.log(`Trying to play with Hls.js: ${decodedURL}`);
-        const hls = new Hls();
-        hls.loadSource(decodedURL);
-        hls.attachMedia(videoElement);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            videoElement.play();
-            console.log(`Playing ${name} with Hls.js`);
+    // Function to initialize Video.js player as fallback
+    function fallbackToVideoJs(url) {
+        player = videojs(videoElement, {
+            sources: [{ src: url, type: 'application/x-mpegURL' }],
+            autoplay: true,
+            controls: true
         });
-        hls.on(Hls.Events.ERROR, (event, data) => {
-            console.error(`Hls.js error for ${name}:`, data);
-            hls.destroy();
-            tryVideoJS(decodedURL, name, videoElement); // Fallback to Video.js
+        player.ready(function() {
+            player.play();
         });
-    } else {
-        tryVideoJS(decodedURL, name, videoElement);
     }
-}
 
-function tryVideoJS(url, name, videoElement) {
-    console.log(`Attempting fallback with Video.js: ${url}`);
-    const player = videojs(videoElement, {
-        controls: true,
-        autoplay: true,
-        preload: 'auto',
-        sources: [{
-            src: url,
-            type: 'application/x-mpegURL' // Type for HLS streams
-        }]
-    });
-
-    player.ready(() => {
-        console.log(`Playing ${name} with Video.js`);
-        player.play();
-    });
-
-    player.on('error', () => {
-        console.error(`Video.js error for ${name}: Unable to play the stream`);
-    });
-}
+    // Load channels when the page is ready
+    loadChannels();
+});
