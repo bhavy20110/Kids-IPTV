@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player</title>
-    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
+    <title>Shaka Player Stream</title>
     <style>
         body {
             background-color: #121212;
@@ -41,12 +40,11 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="video" class="video-js" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <video id="video" style="width: 100%;" controls playsinline></video>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -65,52 +63,7 @@
 
         const errorMessage = document.getElementById('error-message');
 
-        // Attempt to play with HLS.js
-        if (Hls.isSupported()) {
-            const video = document.getElementById('video');
-            const hls = new Hls();
-
-            // Load the source and attach media
-            hls.loadSource(streamUrl);
-            hls.attachMedia(video);
-
-            // Listen for HLS events
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                log('HLS.js: Manifest parsed, starting playback.');
-                video.play();
-            });
-
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                log('HLS.js: Error encountered: ' + data.fatal);
-                if (data.fatal) {
-                    switch (data.fatal) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                        case Hls.ErrorTypes.OTHER_ERROR:
-                            log('HLS.js: Error occurred, attempting to switch to Shaka Player...');
-                            playWithShaka(streamUrl); // Try playing with Shaka Player
-                            break;
-                        default:
-                            log('HLS.js: Unrecoverable error, stopping playback.');
-                            errorMessage.innerText = 'Error: Unable to play the stream.';
-                            break;
-                    }
-                }
-            });
-
-            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                log('HLS.js: Media attached successfully.');
-            });
-
-            hls.on(Hls.Events.MEDIA_DETACHED, function () {
-                log('HLS.js: Media detached successfully.');
-            });
-        } else {
-            log('HLS.js not supported, attempting to use Shaka Player...');
-            playWithShaka(streamUrl); // If HLS is not supported, try Shaka Player directly
-        }
-
-        // Function to attempt playing with Shaka Player
+        // Function to play with Shaka Player
         function playWithShaka(streamUrl) {
             const video = document.getElementById('video');
             const shakaPlayer = new shaka.Player(video);
@@ -123,6 +76,9 @@
                 errorMessage.innerText = 'Error: Unable to play the stream.';
             });
         }
+
+        // Start playing the stream
+        playWithShaka(streamUrl);
     </script>
 </body>
 </html>
