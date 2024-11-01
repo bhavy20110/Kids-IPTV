@@ -6,15 +6,38 @@
     <title>Stream Player</title>
     <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
     <style>
-        /* Add some basic styling */
+        body {
+            background-color: #121212; /* Dark background */
+            color: white; /* Light text color */
+            font-family: Arial, sans-serif; /* Font family */
+            margin: 0;
+            padding: 0;
+        }
         #videoContainer {
             max-width: 800px;
             margin: auto;
             text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #ffffff; /* White color for header */
         }
         .error-message {
             color: red;
             margin-top: 20px;
+        }
+        #debug-log {
+            background-color: #333; /* Darker background for debug log */
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        #debug-log p {
+            margin: 5px 0;
+        }
+        .video-js {
+            background-color: #000; /* Background color for video.js player */
         }
     </style>
 </head>
