@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css">
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flowplayer/7.2.7/flowplayer.min.css">
     <style>
@@ -49,7 +48,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowplayer/7.2.7/flowplayer.min.js"></script>
     <script>
@@ -82,41 +80,15 @@
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     log(`HLS.js: Error encountered - ${data.details}`);
                     if (data.fatal) {
-                        log('HLS.js: Fatal error encountered. Switching to Plyr.');
+                        log('HLS.js: Fatal error encountered. Switching to Video.js.');
                         hls.destroy();
-                        playWithPlyr();
+                        playWithVideoJs();
                     }
                 });
             } else {
-                log('HLS.js not supported, trying Plyr.');
-                playWithPlyr();
-            }
-        }
-
-        // Attempt to play with Plyr
-        function playWithPlyr() {
-            log('Attempting playback with Plyr.');
-            const plyr = new Plyr('#video', {
-                settings: ['quality', 'speed', 'loop']
-            });
-            plyr.source = {
-                type: 'video',
-                sources: [{
-                    src: streamUrl,
-                    type: 'application/x-mpegURL'
-                }]
-            };
-
-            plyr.on('error', (event) => {
-                log(`Plyr: Error encountered - ${event.detail.code}`);
-                log('Plyr: Switching to Video.js.');
+                log('HLS.js not supported, trying Video.js.');
                 playWithVideoJs();
-            });
-
-            plyr.on('ready', () => {
-                log('Plyr: Ready to play, starting playback.');
-                plyr.play();
-            });
+            }
         }
 
         // Attempt to play with Video.js
