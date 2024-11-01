@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link href="https://unpkg.com/@clappr/core@latest/dist/clappr.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
     <style>
         body {
             background-color: #121212; /* Dark background */
@@ -41,13 +41,13 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <div id="clappr-player"></div>
+        <video id="video" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@clappr/core@latest/dist/clappr.min.js"></script>
+    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -63,20 +63,20 @@
             console.log(message);
         }
 
+        // Create Plyr instance
+        const plyr = new Plyr('#video', {
+            // Optional Plyr configuration
+        });
+
         // Attempt to play with HLS.js
         if (Hls.isSupported()) {
-            const videoElement = document.createElement('video');
-            videoElement.style.width = '100%'; // Make video responsive
-            document.getElementById('videoContainer').insertBefore(videoElement, document.getElementById('debug-log'));
-            
             const hls = new Hls();
-
             hls.loadSource(streamUrl);
-            hls.attachMedia(videoElement);
+            hls.attachMedia(plyr.media);
 
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 log('HLS.js: Manifest loaded, starting playback.');
-                videoElement.play();
+                plyr.play();
             });
 
             hls.on(Hls.Events.ERROR, function (event, data) {
@@ -95,44 +95,42 @@
                             break;
                     }
 
-                    // Try using Clappr as another HLS player
-                    log('HLS.js: Switching to Clappr player for playback.');
-                    playWithClappr(streamUrl);
+                    // Try using Plyr directly if HLS fails
+                    log('HLS.js: Switching to Plyr player for playback.');
+                    plyr.source = {
+                        type: 'video',
+                        sources: [
+                            {
+                                src: streamUrl,
+                                type: 'application/x-mpegURL', // HLS MIME type
+                            },
+                        ],
+                    };
                 }
             });
         } else {
             // Fallback if HLS.js is not supported
-            log('HLS.js not supported, trying Clappr player directly.');
-            playWithClappr(streamUrl);
+            log('HLS.js not supported, trying Plyr player directly.');
+            plyr.source = {
+                type: 'video',
+                sources: [
+                    {
+                        src: streamUrl,
+                        type: 'application/x-mpegURL', // HLS MIME type
+                    },
+                ],
+            };
         }
 
-        function playWithClappr(url) {
-            const player = new Clappr.Player({
-                source: url,
-                parentId: '#clappr-player',
-                width: '100%',
-                height: '100%',
-                autoPlay: true,
-                // Add additional Clappr options if needed
-            });
-
-            player.on(Clappr.Events.PLAYER_ERROR, function (error) {
-                log('Clappr: Error occurred during playback. Trying DASH player.');
-                errorMessage.innerText = 'Playback failed with Clappr. Trying DASH player...';
-                playWithDashPlayer(url);
-            });
-
-            player.on(Clappr.Events.PLAYER_PLAYING, function () {
-                log('Clappr: Stream is playing successfully.');
-            });
-        }
+        plyr.on('error', function (event) {
+            log('Plyr: Error occurred during playback. Trying DASH player.');
+            errorMessage.innerText = 'Playback failed with Plyr. Trying DASH player...';
+            playWithDashPlayer(streamUrl);
+        });
 
         function playWithDashPlayer(url) {
-            const videoElement = document.createElement('video');
-            videoElement.style.width = '100%'; // Make video responsive
-            document.getElementById('videoContainer').insertBefore(videoElement, document.getElementById('debug-log'));
             const dashPlayer = dashjs.MediaPlayer().create();
-            dashPlayer.initialize(videoElement, url, true);
+            dashPlayer.initialize(plyr.media, url, true);
 
             dashPlayer.on(dashjs.MediaPlayer.events.ERROR, function (e) {
                 log(`DASH.js: Error occurred - ${e.message}`);
@@ -141,7 +139,7 @@
 
             dashPlayer.on(dashjs.MediaPlayer.events.MANIFEST_PARSED, function () {
                 log('DASH.js: Manifest loaded, starting playback.');
-                videoElement.play();
+                plyr.play();
             });
         }
     </script>
