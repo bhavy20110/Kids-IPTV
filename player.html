@@ -62,6 +62,7 @@
             const logEntry = document.createElement('p');
             logEntry.innerText = message;
             logContainer.appendChild(logEntry);
+            console.log(message);  // Log to console for debugging
         };
 
         const errorMessage = document.getElementById('error-message');
@@ -71,25 +72,44 @@
             const video = document.getElementById('video');
             const hls = new Hls();
 
+            // Load the source and attach media
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
 
+            // Listen for HLS events
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 log('HLS.js: Manifest parsed, starting playback.');
                 video.play();
             });
 
             hls.on(Hls.Events.ERROR, function (event, data) {
+                log('HLS.js: Error encountered: ' + data.fatal);
                 if (data.fatal) {
                     switch (data.fatal) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
+                            log('HLS.js: Network error occurred. Switching to Video.js...');
+                            playWithVideoJS(streamUrl);
+                            break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
                         case Hls.ErrorTypes.OTHER_ERROR:
-                            log('HLS.js: Error encountered, switching to Video.js...');
+                            log('HLS.js: Media error occurred. Switching to Video.js...');
                             playWithVideoJS(streamUrl);
+                            break;
+                        default:
+                            log('HLS.js: Unrecoverable error, stopping playback.');
+                            errorMessage.innerText = 'Error: Unable to play the stream.';
                             break;
                     }
                 }
+            });
+
+            // Listen for media attachment errors
+            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                log('HLS.js: Media attached successfully.');
+            });
+
+            hls.on(Hls.Events.MEDIA_DETACHED, function () {
+                log('HLS.js: Media detached successfully.');
             });
         } else {
             log('HLS.js not supported, switching to Video.js...');
@@ -107,6 +127,13 @@
                 log('Video.js: Error encountered, switching to Shaka Player...');
                 playWithShaka(streamUrl);
             });
+
+            player.ready(function() {
+                log('Video.js: Player is ready, attempting to play stream.');
+                player.play().catch(error => {
+                    log('Video.js: Playback failed: ' + error.message);
+                });
+            });
         }
 
         // Function to attempt playing with Shaka Player
@@ -117,7 +144,7 @@
             shakaPlayer.load(streamUrl).then(() => {
                 log('Shaka Player: Stream loaded successfully, starting playback.');
             }).catch(error => {
-                log('Shaka Player: Error encountered, unable to play the stream.');
+                log('Shaka Player: Error encountered, unable to play the stream: ' + error);
                 errorMessage.innerText = 'Error: Unable to play the stream.';
             });
         }
