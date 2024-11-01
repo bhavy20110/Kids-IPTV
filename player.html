@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css">
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
-    <link rel="stylesheet" href="https://cdn.flowplayer.com/releases/native/stable/skin/skin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flowplayer/7.2.7/flowplayer.min.css">
     <style>
         body {
             background-color: #121212;
@@ -51,8 +51,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
-    <script src="https://cdn.flowplayer.com/releases/native/stable/flowplayer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowplayer/7.2.7/flowplayer.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -67,65 +66,106 @@
             console.log(message);
         }
 
-        function initializePlyr() {
-            const plyr = new Plyr('#video');
+        // Attempt to play with HLS.js
+        function playWithHls() {
             if (Hls.isSupported()) {
+                log('Attempting playback with HLS.js.');
                 const hls = new Hls();
                 hls.loadSource(streamUrl);
-                hls.attachMedia(plyr.media);
+                hls.attachMedia(video);
+
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    plyr.play().catch(error => {
-                        log(`Plyr failed: ${error.message}`);
-                        initializeVideoJS();
-                    });
+                    log('HLS.js: Manifest loaded successfully, starting playback.');
+                    video.play();
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    log(`HLS.js: Error encountered - ${data.details}`);
+                    if (data.fatal) {
+                        log('HLS.js: Fatal error encountered. Switching to Plyr.');
+                        hls.destroy();
+                        playWithPlyr();
+                    }
                 });
             } else {
-                log('HLS.js not supported, trying Plyr directly.');
-                plyr.source = { type: 'video', sources: [{ src: streamUrl, type: 'application/x-mpegURL' }] };
-                plyr.play().catch(error => {
-                    log(`Plyr failed: ${error.message}`);
-                    initializeVideoJS();
-                });
+                log('HLS.js not supported, trying Plyr.');
+                playWithPlyr();
             }
         }
 
-        function initializeVideoJS() {
-            log('Attempting Video.js');
-            const video = document.getElementById('video');
-            const videoPlayer = videojs(video);
-            videoPlayer.src({ src: streamUrl, type: 'application/x-mpegURL' });
+        // Attempt to play with Plyr
+        function playWithPlyr() {
+            log('Attempting playback with Plyr.');
+            const plyr = new Plyr('#video', {
+                settings: ['quality', 'speed', 'loop']
+            });
+            plyr.source = {
+                type: 'video',
+                sources: [{
+                    src: streamUrl,
+                    type: 'application/x-mpegURL'
+                }]
+            };
 
-            videoPlayer.ready(() => {
-                videoPlayer.play().catch(error => {
-                    log(`Video.js failed: ${error.message}`);
-                    initializeFlowplayer();
-                });
+            plyr.on('error', (event) => {
+                log(`Plyr: Error encountered - ${event.detail.code}`);
+                log('Plyr: Switching to Video.js.');
+                playWithVideoJs();
+            });
+
+            plyr.on('ready', () => {
+                log('Plyr: Ready to play, starting playback.');
+                plyr.play();
             });
         }
 
-        function initializeFlowplayer() {
-            log('Attempting Flowplayer');
-            const videoContainer = document.getElementById('videoContainer');
-            videoContainer.innerHTML = '';  // Clear previous players
-            const flowplayerDiv = document.createElement('div');
-            flowplayerDiv.className = 'flowplayer';
-            flowplayerDiv.style.width = '100%';
+        // Attempt to play with Video.js
+        function playWithVideoJs() {
+            log('Attempting playback with Video.js.');
+            const videoElement = document.getElementById('video');
+            const videoJsPlayer = videojs(videoElement);
 
-            flowplayerDiv.innerHTML = `<video crossorigin="anonymous" controls autoplay style="width: 100%;">
-                <source src="${streamUrl}" type="application/x-mpegURL">
-            </video>`;
-            
-            videoContainer.appendChild(flowplayerDiv);
-            try {
-                flowplayer(flowplayerDiv);
-            } catch (error) {
-                log(`Flowplayer failed: ${error.message}`);
-                errorMessage.innerText = "All player options failed to load the video.";
-            }
+            videoJsPlayer.src({
+                src: streamUrl,
+                type: 'application/x-mpegURL'
+            });
+
+            videoJsPlayer.ready(() => {
+                log('Video.js: Ready to play, starting playback.');
+                videoJsPlayer.play();
+            });
+
+            videoJsPlayer.on('error', () => {
+                log(`Video.js: Error encountered - ${videoJsPlayer.error().message}`);
+                log('Video.js: Switching to Flowplayer.');
+                playWithFlowplayer();
+            });
         }
 
-        // Start the fallback chain
-        initializePlyr();
+        // Attempt to play with Flowplayer
+        function playWithFlowplayer() {
+            log('Attempting playback with Flowplayer.');
+            flowplayer('#video', {
+                clip: {
+                    sources: [
+                        { src: streamUrl, type: 'application/x-mpegURL' }
+                    ]
+                }
+            });
+
+            flowplayer('#video').on('error', function(event) {
+                log(`Flowplayer: Error encountered - ${event.detail.message}`);
+                errorMessage.innerText = 'Error playing the stream with all players.';
+            });
+
+            flowplayer('#video').on('ready', function() {
+                log('Flowplayer: Ready to play, starting playback.');
+                flowplayer('#video').play();
+            });
+        }
+
+        // Start playback attempts
+        playWithHls();
     </script>
 </body>
 </html>
