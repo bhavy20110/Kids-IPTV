@@ -16,35 +16,35 @@ function parseM3U(data) {
         line = line.trim();
         if (line.startsWith('#EXTINF:')) {
             if (currentChannel.name) {
-                channels.push(currentChannel); // Save the last channel
-                currentChannel = {}; // Reset for the next channel
+                channels.push(currentChannel);
+                currentChannel = {};
             }
             const nameMatch = line.match(/,(.+)$/);
-            const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-
+            const logoMatch = line.match(/tvg-logo="([^"]+)"/); // Logo extraction
             if (nameMatch) {
-                currentChannel.name = nameMatch[1].trim(); // Channel name
+                currentChannel.name = nameMatch[1].trim();
             }
             if (logoMatch) {
-                currentChannel.logo = logoMatch[1]; // Channel logo URL
+                currentChannel.logo = logoMatch[1];
             }
         } else if (line && !line.startsWith('#')) {
-            currentChannel.url = line.trim(); // Channel URL
+            currentChannel.url = line.trim();
         }
     });
 
     if (currentChannel.name) {
-        channels.push(currentChannel); // Save the last channel if exists
+        channels.push(currentChannel);
     }
 
     return channels;
 }
 
 function displayChannels(channels) {
-    const container = document.getElementById('channel-list');
-    container.innerHTML = ''; // Clear previous channels
+    const container = document.getElementById('channel-container');
+    container.innerHTML = ''; 
+
     if (channels.length === 0) {
-        container.innerHTML = '<p>No channels found</p>'; // Message if no channels
+        container.innerHTML = '<p>No channels found</p>';
     } else {
         channels.forEach(channel => {
             const channelDiv = document.createElement('div');
@@ -59,6 +59,5 @@ function displayChannels(channels) {
 }
 
 function playStream(url, name) {
-    // Always navigate to the player with the provided URL and name
     window.location.href = `player.html?url=${url}&name=${name}`;
 }
