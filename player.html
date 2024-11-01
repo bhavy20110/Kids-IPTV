@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flowplayer/7.2.7/flowplayer.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css">
     <style>
         body {
             background-color: #121212;
@@ -49,95 +49,86 @@
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowplayer/7.2.7/flowplayer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
 
         document.getElementById('channel-name').innerText = channelName;
-        const debugLog = document.getElementById('debug-log');
+
+        const log = (message) => {
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
+        };
+
         const errorMessage = document.getElementById('error-message');
 
-        function log(message) {
-            debugLog.innerHTML += `<p>${message}</p>`;
-            console.log(message);
-        }
-
         // Attempt to play with HLS.js
-        function playWithHls() {
-            if (Hls.isSupported()) {
-                log('Attempting playback with HLS.js.');
-                const hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(video);
+        if (Hls.isSupported()) {
+            const video = document.getElementById('video');
+            const hls = new Hls();
 
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    log('HLS.js: Manifest loaded successfully, starting playback.');
-                    video.play();
-                });
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
 
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    log(`HLS.js: Error encountered - ${data.details}`);
-                    if (data.fatal) {
-                        log('HLS.js: Fatal error encountered. Switching to Video.js.');
-                        hls.destroy();
-                        playWithVideoJs();
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                log('HLS.js: Manifest parsed, starting playback.');
+                video.play();
+            });
+
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                if (data.fatal) {
+                    switch (data.fatal) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            log('HLS.js: Network error encountered.');
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            log('HLS.js: Media error encountered.');
+                            break;
+                        case Hls.ErrorTypes.OTHER_ERROR:
+                            log('HLS.js: Other error encountered.');
+                            break;
                     }
-                });
-            } else {
-                log('HLS.js not supported, trying Video.js.');
-                playWithVideoJs();
-            }
-        }
-
-        // Attempt to play with Video.js
-        function playWithVideoJs() {
-            log('Attempting playback with Video.js.');
-            const videoElement = document.getElementById('video');
-            const videoJsPlayer = videojs(videoElement);
-
-            videoJsPlayer.src({
-                src: streamUrl,
-                type: 'application/x-mpegURL'
-            });
-
-            videoJsPlayer.ready(() => {
-                log('Video.js: Ready to play, starting playback.');
-                videoJsPlayer.play();
-            });
-
-            videoJsPlayer.on('error', () => {
-                log(`Video.js: Error encountered - ${videoJsPlayer.error().message}`);
-                log('Video.js: Switching to Flowplayer.');
-                playWithFlowplayer();
-            });
-        }
-
-        // Attempt to play with Flowplayer
-        function playWithFlowplayer() {
-            log('Attempting playback with Flowplayer.');
-            flowplayer('#video', {
-                clip: {
-                    sources: [
-                        { src: streamUrl, type: 'application/x-mpegURL' }
-                    ]
+                    log('Switching to Video.js...');
+                    playWithVideoJS(streamUrl);
                 }
             });
+        } else {
+            log('HLS.js not supported, switching to Video.js...');
+            playWithVideoJS(streamUrl);
+        }
 
-            flowplayer('#video').on('error', function(event) {
-                log(`Flowplayer: Error encountered - ${event.detail.message}`);
-                errorMessage.innerText = 'Error playing the stream with all players.';
-            });
+        // Function to attempt playing with Video.js
+        function playWithVideoJS(streamUrl) {
+            const video = document.getElementById('video');
+            const player = videojs(video, {controls: true, autoplay: true});
 
-            flowplayer('#video').on('ready', function() {
-                log('Flowplayer: Ready to play, starting playback.');
-                flowplayer('#video').play();
+            player.src({ src: streamUrl, type: 'application/x-mpegURL' });
+
+            player.on('error', function() {
+                log('Video.js: Error encountered, switching to MediaElement.js...');
+                playWithMediaElement(streamUrl);
             });
         }
 
-        // Start playback attempts
-        playWithHls();
+        // Function to attempt playing with MediaElement.js
+        function playWithMediaElement(streamUrl) {
+            const video = document.getElementById('video');
+
+            const player = new MediaElementPlayer(video, {
+                success: function(mediaElement) {
+                    log('MediaElement.js: Player initialized, starting playback.');
+                    mediaElement.setSrc(streamUrl);
+                    mediaElement.play();
+                },
+                error: function() {
+                    errorMessage.innerText = 'Error: Unable to play the stream.';
+                }
+            });
+        }
     </script>
 </body>
 </html>
