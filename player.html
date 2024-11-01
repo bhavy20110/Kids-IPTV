@@ -4,78 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Include Video.js CSS -->
-    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
     <style>
+        /* Add some basic styling */
+        #videoContainer {
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
+        }
         .error-message {
             color: red;
-            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="video-player" class="video-js vjs-default-skin" controls autoplay></video>
-        <div id="error-message" class="error-message"></div>
+        <video id="video" class="video-js" controls preload="auto" width="640" height="360">
+            <source id="video-source" src="" type="application/x-mpegURL">
+            Your browser does not support HTML5 video.
+        </video>
+        <div id="debug-log"></div>
+        <div class="error-message" id="error-message"></div>
     </div>
-    <!-- Include HLS.js -->
+
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <!-- Include Video.js JS -->
-    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+    <script src="https://unpkg.com/video.js/dist/video.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const url = params.get('url');
-        const name = params.get('name');
+        const streamUrl = decodeURIComponent(params.get('url'));
+        const channelName = decodeURIComponent(params.get('name'));
 
-        document.getElementById('channel-name').textContent = name || 'Stream Player';
-
-        const videoPlayer = document.getElementById('video-player');
+        document.getElementById('channel-name').innerText = channelName;
+        const debugLog = document.getElementById('debug-log');
         const errorMessage = document.getElementById('error-message');
 
-        // Function to play using HLS.js
-        function playWithHls(url) {
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(decodeURIComponent(url));
-                hls.attachMedia(videoPlayer);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    videoPlayer.play();
-                });
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) {
-                        switch (data.fatal) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                            case Hls.ErrorTypes.OTHER_ERROR:
-                                // Try Video.js if HLS fails
-                                fallbackToVideoJs(decodeURIComponent(url));
-                                break;
-                        }
-                    }
-                });
-            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                // Native HLS support
-                videoPlayer.src = decodeURIComponent(url);
-                videoPlayer.addEventListener('loadedmetadata', () => {
-                    videoPlayer.play();
-                });
-            } else {
-                errorMessage.textContent = 'Your browser does not support HLS.';
-            }
+        function log(message) {
+            debugLog.innerHTML += `<p>${message}</p>`;
+            console.log(message);
         }
 
-        // Function to fallback to Video.js
-        function fallbackToVideoJs(url) {
-            errorMessage.textContent = 'Attempting to play with Video.js...';
-            videoPlayer.src = decodeURIComponent(url);
-            videoPlayer.play().catch(error => {
-                errorMessage.textContent = 'Error playing the stream. Please check the URL.';
+        // Attempt to play with HLS.js
+        if (Hls.isSupported()) {
+            const video = document.getElementById('video');
+            const hls = new Hls();
+
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                log('HLS.js: Manifest loaded, starting playback.');
+                video.play();
+            });
+
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                log(`HLS.js: Error encountered - ${data.details}`);
+
+                if (data.fatal) {
+                    switch (data.fatal) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            log('HLS.js: A network error occurred.');
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            log('HLS.js: A media error occurred.');
+                            break;
+                        case Hls.ErrorTypes.OTHER_ERROR:
+                            log('HLS.js: An unknown error occurred.');
+                            break;
+                    }
+
+                    // Try using Video.js if HLS.js fails
+                    log('HLS.js: Switching to Video.js for playback.');
+                    playWithVideoJs(streamUrl);
+                }
+            });
+        } else {
+            // Fallback if HLS.js is not supported
+            log('HLS.js not supported, trying Video.js directly.');
+            playWithVideoJs(streamUrl);
+        }
+
+        function playWithVideoJs(url) {
+            const player = videojs('video', { controls: true });
+
+            player.src({ src: url, type: 'application/x-mpegURL' });
+
+            player.ready(() => {
+                log('Video.js: Ready to play, starting playback.');
+                player.play();
+            });
+
+            player.on('error', () => {
+                log('Video.js: Error occurred during playback.');
+                errorMessage.innerText = 'Playback failed with Video.js. Please check the stream URL or try another link.';
             });
         }
-
-        // Start playing the stream
-        playWithHls(url);
     </script>
 </body>
 </html>
