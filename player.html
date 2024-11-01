@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css">
     <style>
         body {
             background-color: #121212;
@@ -36,25 +37,19 @@
         #debug-log p {
             margin: 5px 0;
         }
-        #m3u8-player {
-            display: none;
-            width: 100%;
-            height: 400px; /* Adjust height as needed */
-            border: 1px solid #444;
-        }
     </style>
 </head>
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
         <video id="video" class="video-js" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
-        <iframe id="m3u8-player" src="" frameborder="0" allowfullscreen></iframe>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -70,7 +65,6 @@
         };
 
         const errorMessage = document.getElementById('error-message');
-        const m3u8Player = document.getElementById('m3u8-player');
 
         // Attempt to play with HLS.js
         if (Hls.isSupported()) {
@@ -86,19 +80,25 @@
             });
 
             hls.on(Hls.Events.ERROR, function (event, data) {
-                log(`HLS.js Error: ${data.fatal}`);
                 if (data.fatal) {
-                    log('HLS.js: Switching to Video.js...');
-                    playWithVideoJS(streamUrl); // Attempt Video.js playback
+                    switch (data.fatal) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            log('HLS.js: Network error encountered.');
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            log('HLS.js: Media error encountered.');
+                            break;
+                        case Hls.ErrorTypes.OTHER_ERROR:
+                            log('HLS.js: Other error encountered.');
+                            break;
+                    }
+                    log('Switching to Video.js...');
+                    playWithVideoJS(streamUrl);
                 }
-            });
-
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                log('HLS.js: Successfully loaded stream.');
             });
         } else {
             log('HLS.js not supported, switching to Video.js...');
-            playWithVideoJS(streamUrl); // Attempt Video.js playback
+            playWithVideoJS(streamUrl);
         }
 
         // Function to attempt playing with Video.js
@@ -109,17 +109,25 @@
             player.src({ src: streamUrl, type: 'application/x-mpegURL' });
 
             player.on('error', function() {
-                log('Video.js: Error encountered, loading M3U8 link...');
-                errorMessage.innerText = 'Unable to play the stream. Loading M3U8 link...';
-                loadM3U8(streamUrl); // Load M3U8 link in iframe
+                log('Video.js: Error encountered, switching to MediaElement.js...');
+                playWithMediaElement(streamUrl);
             });
         }
 
-        // Function to load the M3U8 link in an iframe
-        function loadM3U8(streamUrl) {
-            m3u8Player.src = streamUrl;
-            m3u8Player.style.display = 'block'; // Show the iframe for M3U8
-            document.getElementById('video').style.display = 'none'; // Hide the video player
+        // Function to attempt playing with MediaElement.js
+        function playWithMediaElement(streamUrl) {
+            const video = document.getElementById('video');
+
+            const player = new MediaElementPlayer(video, {
+                success: function(mediaElement) {
+                    log('MediaElement.js: Player initialized, starting playback.');
+                    mediaElement.setSrc(streamUrl);
+                    mediaElement.play();
+                },
+                error: function() {
+                    errorMessage.innerText = 'Error: Unable to play the stream.';
+                }
+            });
         }
     </script>
 </body>
