@@ -47,8 +47,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -76,9 +74,6 @@
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
 
-            // Flag to track if HLS.js has logged any errors
-            let hlsErrorOccurred = false;
-
             // Listen for HLS events
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 log('HLS.js: Manifest parsed, starting playback.');
@@ -87,14 +82,13 @@
 
             hls.on(Hls.Events.ERROR, function (event, data) {
                 log('HLS.js: Error encountered: ' + data.fatal);
-                hlsErrorOccurred = true; // Set flag on error
                 if (data.fatal) {
                     switch (data.fatal) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                         case Hls.ErrorTypes.MEDIA_ERROR:
                         case Hls.ErrorTypes.OTHER_ERROR:
-                            log('HLS.js: Switching to Video.js...');
-                            playWithVideoJS(streamUrl);
+                            log('HLS.js: Switching to Shaka Player...');
+                            playWithShaka(streamUrl);
                             break;
                         default:
                             log('HLS.js: Unrecoverable error, stopping playback.');
@@ -112,29 +106,8 @@
                 log('HLS.js: Media detached successfully.');
             });
         } else {
-            log('HLS.js not supported, switching to Video.js...');
-            playWithVideoJS(streamUrl);
-        }
-
-        // Function to attempt playing with Video.js
-        function playWithVideoJS(streamUrl) {
-            const video = document.getElementById('video');
-            const player = videojs(video, { controls: true, autoplay: true });
-
-            player.src({ src: streamUrl, type: 'application/x-mpegURL' });
-
-            player.on('error', function() {
-                log('Video.js: Error encountered, switching to Shaka Player...');
-                playWithShaka(streamUrl);
-            });
-
-            player.ready(function() {
-                log('Video.js: Player is ready, attempting to play stream.');
-                player.play().catch(error => {
-                    log('Video.js: Playback failed: ' + error.message);
-                    playWithShaka(streamUrl); // Immediately switch to Shaka Player on error
-                });
-            });
+            log('HLS.js not supported, switching to Shaka Player...');
+            playWithShaka(streamUrl);
         }
 
         // Function to attempt playing with Shaka Player
