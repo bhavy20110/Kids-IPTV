@@ -65,17 +65,3 @@ function displayChannels(channels) {
 function playStream(url, name) {
     window.location.href = `player.html?url=${url}&name=${name}`;
 }
-// Function to play with Shaka Player
-function playWithShaka(streamUrl) {
-    const video = document.getElementById('video');
-    const shakaPlayer = new shaka.Player(video);
-
-    shakaPlayer.load(streamUrl).then(() => {
-        log('Shaka Player: Stream loaded successfully, starting playback.');
-        video.play();
-    }).catch(error => {
-        log('Shaka Player: Error encountered, unable to play the stream: ' + error.message);
-        log('Shaka Player Error Details:', JSON.stringify(error));
-        errorMessage.innerText = 'Error: Unable to play the stream. ' + error.message;
-    });
-}
