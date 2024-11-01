@@ -59,5 +59,6 @@ function displayChannels(channels) {
 }
 
 function playStream(url, name) {
-    window.location.href = `player.html?url=${url}&name=${name}`; // Navigate to player page
+    // Always navigate to the player with the provided URL and name
+    window.location.href = `player.html?url=${url}&name=${name}`;
 }
