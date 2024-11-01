@@ -87,8 +87,8 @@
                         case Hls.ErrorTypes.NETWORK_ERROR:
                         case Hls.ErrorTypes.MEDIA_ERROR:
                         case Hls.ErrorTypes.OTHER_ERROR:
-                            log('HLS.js: Switching to Shaka Player...');
-                            playWithShaka(streamUrl);
+                            log('HLS.js: Error occurred, attempting to switch to Shaka Player...');
+                            playWithShaka(streamUrl); // Try playing with Shaka Player
                             break;
                         default:
                             log('HLS.js: Unrecoverable error, stopping playback.');
@@ -106,8 +106,8 @@
                 log('HLS.js: Media detached successfully.');
             });
         } else {
-            log('HLS.js not supported, switching to Shaka Player...');
-            playWithShaka(streamUrl);
+            log('HLS.js not supported, attempting to use Shaka Player...');
+            playWithShaka(streamUrl); // If HLS is not supported, try Shaka Player directly
         }
 
         // Function to attempt playing with Shaka Player
