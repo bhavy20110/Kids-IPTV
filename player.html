@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
-            background-color: #121212; /* Dark background */
-            color: white; /* Light text color */
-            font-family: Arial, sans-serif; /* Font family */
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -21,14 +21,14 @@
             padding: 20px;
         }
         h1 {
-            color: #ffffff; /* White color for header */
+            color: #ffffff;
         }
         .error-message {
             color: red;
             margin-top: 20px;
         }
         #debug-log {
-            background-color: #333; /* Darker background for debug log */
+            background-color: #333;
             padding: 10px;
             border-radius: 5px;
             margin-top: 20px;
@@ -66,110 +66,79 @@
             console.log(message);
         }
 
-        // Create Plyr instance
-        const plyr = new Plyr('#video', {
-            // Optional Plyr configuration
-        });
+        // Try Plyr with HLS.js
+        function playWithPlyr() {
+            log('Attempting playback with Plyr and HLS.js...');
+            const plyr = new Plyr('#video');
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(plyr.media);
 
-        // Attempt to play with HLS.js
-        if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(streamUrl);
-            hls.attachMedia(plyr.media);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    log('HLS.js: Manifest loaded, starting playback.');
+                    plyr.play();
+                });
 
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                log('HLS.js: Manifest loaded, starting playback.');
-                plyr.play();
-            });
-
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                log(`HLS.js: Error encountered - ${data.details}`);
-
-                if (data.fatal) {
-                    switch (data.fatal) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            log('HLS.js: A network error occurred.');
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            log('HLS.js: A media error occurred.');
-                            break;
-                        case Hls.ErrorTypes.OTHER_ERROR:
-                            log('HLS.js: An unknown error occurred.');
-                            break;
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    log(`HLS.js: Error encountered - ${data.details}`);
+                    if (data.fatal) {
+                        log('HLS.js: Fatal error. Switching to Video.js...');
+                        playWithVideoJS();
                     }
-
-                    // Try using Plyr player for playback if HLS fails
-                    log('HLS.js: Switching to Plyr player for playback.');
-                    plyr.source = {
-                        type: 'video',
-                        sources: [
-                            {
-                                src: streamUrl,
-                                type: 'application/x-mpegURL', // HLS MIME type
-                            },
-                        ],
-                    };
-                }
-            });
-        } else {
-            log('HLS.js not supported, trying Plyr player directly.');
-            plyr.source = {
-                type: 'video',
-                sources: [
-                    {
-                        src: streamUrl,
-                        type: 'application/x-mpegURL', // HLS MIME type
-                    },
-                ],
-            };
+                });
+            } else {
+                log('HLS.js not supported. Switching to Video.js...');
+                playWithVideoJS();
+            }
         }
 
-        plyr.on('error', function (event) {
-            log('Plyr: Error occurred during playback. Trying DASH player.');
-            errorMessage.innerText = 'Playback failed with Plyr. Trying DASH player...';
-            playWithDashPlayer(streamUrl);
-        });
+        // Try Video.js with HLS
+        function playWithVideoJS() {
+            log('Attempting playback with Video.js...');
+            const videoElement = document.getElementById('video');
+            videoElement.className = 'video-js'; // Add video-js class for Video.js styling
 
-        function playWithDashPlayer(url) {
-            const dashPlayer = dashjs.MediaPlayer().create();
-            dashPlayer.initialize(plyr.media, url, true);
-
-            dashPlayer.on(dashjs.MediaPlayer.events.ERROR, function (e) {
-                log(`DASH.js: Error occurred - ${e.message}`);
-                errorMessage.innerText = 'Playback failed with DASH player. Trying another HLS player...';
-                tryAnotherHlsPlayer(url);
+            const videoJsPlayer = videojs(videoElement, {
+                autoplay: true,
+                controls: true,
+                preload: 'auto'
             });
-
-            dashPlayer.on(dashjs.MediaPlayer.events.MANIFEST_PARSED, function () {
-                log('DASH.js: Manifest loaded, starting playback.');
-                plyr.play();
-            });
-        }
-
-        function tryAnotherHlsPlayer(url) {
-            // Create Video.js instance with HLS support
-            const videoElement = document.createElement('video');
-            videoElement.className = 'video-js';
-            videoElement.controls = true;
-            videoElement.style.width = '100%';
-            document.getElementById('videoContainer').appendChild(videoElement);
-            const videoJsPlayer = videojs(videoElement);
 
             videoJsPlayer.src({
-                src: url,
-                type: 'application/x-mpegURL',
+                src: streamUrl,
+                type: 'application/x-mpegURL'
             });
 
             videoJsPlayer.on('error', function () {
-                log('Video.js: Error occurred. Unable to play the stream.');
-                errorMessage.innerText = 'Playback failed with Video.js. Please check the stream URL or try another link.';
+                log('Video.js: Error occurred. Switching to DASH player...');
+                playWithDashPlayer();
             });
 
-            videoJsPlayer.on('ready', function () {
+            videoJsPlayer.ready(function () {
                 log('Video.js: Ready to play, starting playback.');
                 videoJsPlayer.play();
             });
         }
+
+        // Try DASH.js as fallback
+        function playWithDashPlayer() {
+            log('Attempting playback with DASH.js...');
+            const dashPlayer = dashjs.MediaPlayer().create();
+            dashPlayer.initialize(document.getElementById('video'), streamUrl, true);
+
+            dashPlayer.on(dashjs.MediaPlayer.events.ERROR, function (e) {
+                log(`DASH.js: Error occurred - ${e.message}`);
+                errorMessage.innerText = 'All playback methods failed. Please check the stream URL.';
+            });
+
+            dashPlayer.on(dashjs.MediaPlayer.events.MANIFEST_PARSED, function () {
+                log('DASH.js: Manifest loaded, starting playback.');
+            });
+        }
+
+        // Start playback with Plyr first
+        playWithPlyr();
     </script>
 </body>
 </html>
