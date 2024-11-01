@@ -3,43 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Live TV Player</title>
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet">
+    <style>
+        /* Basic styling for channel list */
+        #channel-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .channel {
+            cursor: pointer;
+            text-align: center;
+        }
+        .channel-logo {
+            width: 100px;
+            height: 75px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <video id="video-player" controls autoplay></video>
-    </div>
+    <h1>Live TV Player</h1>
+    
+    <!-- Channel List -->
+    <div id="channel-container"></div>
+    
+    <!-- Video Player -->
+    <video id="video-player" class="video-js vjs-default-skin" controls autoplay preload="auto" width="600" height="400">
+        <p class="vjs-no-js">
+            To view this video please enable JavaScript, and consider upgrading to a
+            web browser that
+            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+        </p>
+    </video>
 
-    <!-- Include HLS.js for HLS playback -->
+    <!-- Hls.js and Video.js Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const url = decodeURIComponent(urlParams.get('url'));
-        const name = decodeURIComponent(urlParams.get('name'));
-
-        document.title = name;
-        const video = document.getElementById('video-player');
-
-        if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play();
-            });
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                console.error("HLS.js error:", data);
-                alert("Stream error. This channel may not support HLS playback.");
-            });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = url;
-            video.play();
-        } else {
-            console.error("HLS is not supported by this browser.");
-            alert("HLS is not supported by this browser.");
-        }
-    </script>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+    
+    <!-- Custom Script -->
+    <script src="script.js"></script>
 </body>
 </html>
