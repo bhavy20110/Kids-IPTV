@@ -14,18 +14,15 @@
     <!-- Include HLS.js for HLS playback -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-    <!-- Include dash.js for DASH playback -->
-    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const url = decodeURIComponent(urlParams.get('url'));
         const name = decodeURIComponent(urlParams.get('name'));
 
-        document.title = name; // Set title to channel name
+        document.title = name;
         const video = document.getElementById('video-player');
 
-        function playWithHLS(url) {
+        if (Hls.isSupported()) {
             const hls = new Hls();
             hls.loadSource(url);
             hls.attachMedia(video);
@@ -34,32 +31,14 @@
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
                 console.error("HLS.js error:", data);
+                alert("Stream error. This channel may not support HLS playback.");
             });
-        }
-
-        function playWithDASH(url) {
-            const player = dashjs.MediaPlayer().create();
-            player.initialize(video, url, true);
-        }
-
-        // Determine playback based on URL
-        if (url.endsWith(".m3u8")) {
-            // Try HLS
-            if (Hls.isSupported()) {
-                playWithHLS(url);
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-                video.play();
-            } else {
-                console.error("This browser does not support HLS streaming.");
-                alert("This browser does not support HLS streaming.");
-            }
-        } else if (url.endsWith(".mpd")) {
-            // Try DASH
-            playWithDASH(url);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
+            video.play();
         } else {
-            console.warn("Unknown stream type. Attempting HLS playback.");
-            playWithHLS(url); // Try HLS as a fallback for any other URLs
+            console.error("HLS is not supported by this browser.");
+            alert("HLS is not supported by this browser.");
         }
     </script>
 </body>
