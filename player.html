@@ -5,49 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
     <div class="container">
-        <h1 id="channel-name">Live Stream</h1>
-        <video id="video" controls style="width: 100%; max-height: 80vh;"></video>
+        <video id="video-player" controls autoplay></video>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const streamUrl = urlParams.get('url');
-            const channelName = decodeURIComponent(urlParams.get('name'));
+        const urlParams = new URLSearchParams(window.location.search);
+        const url = decodeURIComponent(urlParams.get('url'));
+        const name = decodeURIComponent(urlParams.get('name'));
 
-            document.getElementById('channel-name').textContent = channelName; // Set the channel name
+        document.title = name; // Set title to channel name
 
-            // Initialize video player
-            const video = document.getElementById('video');
+        const video = document.getElementById('video-player');
 
-            function playStream(url) {
-                if (url.endsWith('.m3u8')) {
-                    if (Hls.isSupported()) {
-                        const hls = new Hls();
-                        hls.loadSource(url);
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                            video.play();
-                        });
-                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        video.src = url;
-                        video.addEventListener('loadedmetadata', function () {
-                            video.play();
-                        });
-                    } else {
-                        console.error('HLS not supported in this browser');
-                    }
-                } else {
-                    console.error('Unsupported stream format: ' + url);
-                }
-            }
-
-            // Start streaming the selected channel
-            playStream(streamUrl);
-        });
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play();
+            });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error("HLS.js error:", data);
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
+            video.addEventListener('loadedmetadata', () => {
+                video.play();
+            });
+        } else {
+            console.error("HLS not supported on this browser");
+            alert("This browser does not support HLS streaming.");
+        }
     </script>
 </body>
 </html>
