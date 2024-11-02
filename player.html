@@ -80,6 +80,19 @@
                     log('Video.js encountered an error. Trying JSMpeg fallback.');
                     loadJSMpegPlayer();
                 });
+
+                player.on('playing', () => {
+                    log('Video.js is playing the stream.');
+                });
+
+                player.on('pause', () => {
+                    log('Video.js is paused.');
+                });
+                
+                player.on('ended', () => {
+                    log('Video.js stream ended.');
+                });
+
             } catch (e) {
                 log('Error initializing Video.js: ' + e.message);
                 loadJSMpegPlayer();
@@ -104,7 +117,12 @@
                     canvas: canvas,
                     autoplay: true,
                     loop: false,
-                    // Remove 'on' event handling for error, since it may not be supported
+                });
+
+                // Check if the player is playing
+                jsmpegPlayer.on('error', (err) => {
+                    errorMessage.innerText = 'Error: JSMpeg failed to play the stream.';
+                    log('JSMpeg encountered an error: ' + err);
                 });
 
                 // Set an interval to check if the player is playing
