@@ -41,8 +41,8 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
-        <div id="bitmovin-player" style="display:none;"></div> <!-- Hidden initially -->
+        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%; height: auto;"></video>
+        <button id="play-button">Play Video</button>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
@@ -76,11 +76,15 @@
                 src: streamUrl,
                 type: 'application/x-mpegURL'
             });
-            player.play().then(() => {
-                log('Video.js is playing the stream.');
-            }).catch(err => {
-                log('Video.js playback failed: ' + err.message);
-                fallbackToBitmovin(); // Fallback to Bitmovin if Video.js fails
+
+            // Add event listener to play the video when the button is clicked
+            document.getElementById('play-button').addEventListener('click', () => {
+                player.play().then(() => {
+                    log('Video.js is playing the stream.');
+                }).catch(err => {
+                    log('Video.js playback failed: ' + err.message);
+                    fallbackToBitmovin(); // Fallback to Bitmovin if Video.js fails
+                });
             });
 
             player.on('error', () => {
@@ -92,35 +96,32 @@
 
         function fallbackToBitmovin() {
             log('Falling back to Bitmovin Player...');
-            // Hide Video.js player and show Bitmovin player
-            document.getElementById('video').style.display = 'none';
-            document.getElementById('bitmovin-player').style.display = 'block';
+            // Pause Video.js player if it’s still trying to play
+            player.pause(); // Pause Video.js player
 
+            // Initialize Bitmovin Player
             const bitmovinPlayer = bitmovin.player('bitmovin-player');
             const conf = {
-                key: '0387c97e-4b79-484b-a519-489ba075ab1c',
+                key: '0387c97e-4b79-484b-a519-489ba075ab1c', // Your Bitmovin player key
                 source: {
                     hls: streamUrl
                 },
                 style: {
                     'width': '100%',
-                    'height': '100%'
+                    'height': '400px'
                 }
             };
 
             bitmovinPlayer.load(conf).then(() => {
                 log('Bitmovin Player loaded successfully. Attempting to play...');
-                bitmovinPlayer.play().then(() => {
-                    log('Bitmovin Player is playing the stream.');
-                }).catch(err => {
-                    log('Bitmovin playback failed: ' + err.message);
-                    errorMessage.innerText = 'Error: Unable to play the stream on Bitmovin Player.';
-                });
+                return bitmovinPlayer.play();
+            }).then(() => {
+                log('Bitmovin Player is playing the stream.');
             }).catch(err => {
-                log('Failed to load Bitmovin Player: ' + err.message);
-                errorMessage.innerText = 'Error: Unable to load Bitmovin Player.';
+                log('Bitmovin playback failed: ' + err.message);
+                errorMessage.innerText = 'Error: Unable to play the stream on Bitmovin Player.';
             });
         }
     </script>
 </body>
-</html>
+    </html>
