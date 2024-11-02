@@ -3,87 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
-    <link href="https://vjs.zencdn.net/7.10.2/video-js.css" rel="stylesheet">
-    <script src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
-    <script src="https://bitmovin.com/js/bitmovinplayer/stable/bitmovinplayer.js"></script>
+    <title>Stream Player</title>
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
-        /* Add your CSS styles here */
-        #videoContainer {
-            display: none;
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        #playBitmovin {
-            display: none; /* Initially hidden */
+        #videoContainer {
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #ffffff;
+        }
+        .error-message {
+            color: red;
             margin-top: 20px;
+        }
+        #debug-log {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        #debug-log p {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-    <h1>Video Player</h1>
     <div id="videoContainer">
-        <video
-            id="videojs-player"
-            class="video-js"
-            controls
-            width="640"
-            height="360"
-        >
-            <source src="YOUR_VIDEO_SOURCE_HERE" type="video/mp4">
-        </video>
+        <h1 id="channel-name"></h1>
+        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <div id="debug-log"></div>
+        <div class="error-message" id="error-message"></div>
     </div>
-    <button id="playBitmovin">Play with Bitmovin</button>
 
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
     <script>
-        // Initialize Video.js
-        const videojsPlayer = videojs('videojs-player', {}, function() {
-            console.log('Video.js player is ready. Attempting to set source...');
-            this.src({ src: 'YOUR_VIDEO_SOURCE_HERE', type: 'video/mp4' });
-            
-            this.on('error', function() {
-                console.error('Video.js encountered an error while playing the stream.');
-                document.getElementById('videoContainer').style.display = 'none';
-                document.getElementById('playBitmovin').style.display = 'block'; // Show Bitmovin button
+        const params = new URLSearchParams(window.location.search);
+        const streamUrl = decodeURIComponent(params.get('url'));
+        const channelName = decodeURIComponent(params.get('name'));
+
+        document.getElementById('channel-name').innerText = channelName;
+
+        const log = (message) => {
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
+        };
+
+        const errorMessage = document.getElementById('error-message');
+
+        // Initialize Video.js player
+        const player = videojs('video');
+
+        player.ready(() => {
+            player.src({
+                src: streamUrl,
+                type: 'application/x-mpegURL'
+            });
+            player.play();
+
+            player.on('error', () => {
+                errorMessage.innerText = 'Error: Unable to play the stream.';
+                log('Error encountered while trying to play the stream.');
             });
         });
-
-        // Function to initialize Bitmovin player
-        function loadBitmovinPlayer() {
-            const bitmovinPlayer = bitmovin.player('bitmovinPlayerContainer');
-            const config = {
-                key: '{{BITMOVIN_API}}', // Placeholder for Bitmovin API Key
-                source: {
-                    hls: 'YOUR_VIDEO_SOURCE_HERE'
-                },
-                playback: {
-                    autoplay: false,
-                    muted: false
-                }
-            };
-
-            bitmovinPlayer.load(config).then(function() {
-                console.log('Bitmovin player successfully loaded!');
-            }).catch(function(error) {
-                console.error('Error loading Bitmovin player:', error);
-            });
-        }
-
-        // Handle Bitmovin play button click
-        document.getElementById('playBitmovin').addEventListener('click', function() {
-            document.getElementById('videoContainer').style.display = 'none';
-            loadBitmovinPlayer(); // Load Bitmovin player when button is clicked
-        });
-
-        // Optionally call loadBitmovinPlayer directly to attempt to load Bitmovin player on error
     </script>
-
-    <div id="bitmovinPlayerContainer" style="display:none;"></div> <!-- Container for Bitmovin player -->
-
-    <script>
-        // Replace placeholder with the actual API key using server-side rendering
-        const bitmovinApiKey = '{{ secrets.BITMOVIN_API }}'; // This will be replaced by the server-side code
-        document.querySelector('script:contains("{{BITMOVIN_API}}")').innerHTML = 
-            document.querySelector('script:contains("{{BITMOVIN_API}}")').innerHTML.replace('{{BITMOVIN_API}}', bitmovinApiKey);
-    </script>
-
 </body>
-        </html>
+</html>
