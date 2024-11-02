@@ -1,101 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player</title>
-    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
-    <style>
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        #videoContainer {
-            max-width: 800px;
-            margin: auto;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 {
-            color: #ffffff;
-        }
-        .error-message {
-            color: red;
-            margin-top: 20px;
-        }
-        #debug-log {
-            background-color: #333;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        #debug-log p {
-            margin: 5px 0;
-        }
-    </style>
-</head>
-<body>
-    <div id="videoContainer">
-        <h1 id="channel-name"></h1>
-        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
-        <div id="debug-log"></div>
-        <div class="error-message" id="error-message"></div>
-    </div>
+<script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.0.9/shaka-player.compiled.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const streamUrl = decodeURIComponent(params.get('url'));
+    const channelName = decodeURIComponent(params.get('name'));
 
-    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
+    document.getElementById('channel-name').innerText = channelName;
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const streamUrl = decodeURIComponent(params.get('url'));
-        const channelName = decodeURIComponent(params.get('name'));
+    const log = (message) => {
+        const logContainer = document.getElementById('debug-log');
+        const logEntry = document.createElement('p');
+        logEntry.innerText = message;
+        logContainer.appendChild(logEntry);
+    };
 
-        document.getElementById('channel-name').innerText = channelName;
+    const errorMessage = document.getElementById('error-message');
 
-        const log = (message) => {
-            const logContainer = document.getElementById('debug-log');
-            const logEntry = document.createElement('p');
-            logEntry.innerText = message;
-            logContainer.appendChild(logEntry);
-        };
+    // Initialize Video.js player
+    const player = videojs('video');
 
-        const errorMessage = document.getElementById('error-message');
-
-        // Initialize Video.js player
-        const player = videojs('video');
-
-        player.ready(() => {
-            player.src({
-                src: streamUrl,
-                type: 'application/x-mpegURL'
-            });
-            player.play().catch(error => {
-                log('Video.js failed to start playing the stream.');
-                errorMessage.innerText = 'Error: Unable to play the stream with Video.js.';
-                loadWithShakaPlayer();
-            });
-
-            player.on('error', () => {
-                errorMessage.innerText = 'Error: Unable to play the stream.';
-                log('Error encountered while trying to play the stream.');
-                loadWithShakaPlayer();
-            });
+    player.ready(() => {
+        player.src({
+            src: streamUrl,
+            type: 'application/x-mpegURL'
         });
+        player.play();
 
-        function loadWithShakaPlayer() {
-            const shakaPlayer = new shaka.Player(video);
-            shakaPlayer.load(streamUrl).then(() => {
-                log('Shaka Player loaded the stream successfully.');
-            }).catch((error) => {
+        player.on('error', async () => {
+            errorMessage.innerText = 'Error: Unable to play the stream with Video.js. Trying Shaka Player...';
+            log('Error encountered while trying to play the stream with Video.js.');
+
+            // Attempt to initialize Shaka Player
+            const shakaPlayer = new shaka.Player(document.getElementById('video'));
+
+            try {
+                await shakaPlayer.load(streamUrl);
+                log('Successfully loaded stream with Shaka Player.');
+                shakaPlayer.play();
+            } catch (error) {
                 errorMessage.innerText = 'Error loading stream with Shaka Player: ' + error.message;
-                log('Error code ' + error.code + ', object ' + error);
-            });
-        }
-    </script>
-</body>
-</html>
+                log('Shaka Player error:', error);
+            }
+        });
+    });
+        </script>
