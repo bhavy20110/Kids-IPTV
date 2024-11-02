@@ -48,9 +48,9 @@
 
     <!-- Video.js Library -->
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <!-- JSMpeg Library -->
-    <script src="https://cdn.jsdelivr.net/npm/jsmpeg@0.3.0/jsmpeg.min.js"></script>
-
+    <!-- JSMpeg Fork Library -->
+    <script src="https://cdn.jsdelivr.net/gh/phoboslab/jsmpeg@master/jsmpeg.min.js"></script>
+    <!-- Your custom script -->
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -87,6 +87,12 @@
         }
 
         function loadJSMpegPlayer() {
+            if (typeof JSMpeg === 'undefined') {
+                errorMessage.innerText = 'Error: JSMpeg is not defined. Please check that the library is loading properly.';
+                log('JSMpeg is not defined. Check the library URL or loading order.');
+                return;
+            }
+
             try {
                 document.getElementById('video').remove(); // Remove the Video.js video element
                 const canvas = document.createElement('canvas');
@@ -94,10 +100,15 @@
                 canvas.style.width = '100%';
                 document.getElementById('videoContainer').appendChild(canvas);
 
-                new JSMpeg.Player(streamUrl, {
+                const jsmpegPlayer = new JSMpeg.Player(streamUrl, {
                     canvas: canvas,
                     autoplay: true,
                     loop: false
+                });
+
+                jsmpegPlayer.on('error', (e) => {
+                    errorMessage.innerText = 'Error: JSMpeg encountered an error while playing the stream.';
+                    log('JSMpeg encountered an error: ' + e.message);
                 });
 
                 log('JSMpeg is playing the stream.');
@@ -111,4 +122,4 @@
         window.addEventListener('load', initializeVideoJS);
     </script>
 </body>
-</html>
+    </html>
