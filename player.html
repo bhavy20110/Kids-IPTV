@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player with VLC.js Fallback</title>
+    <title>Stream Player</title>
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -39,14 +40,16 @@
 </head>
 <body>
     <div id="videoContainer">
-        <h1 id="channel-name">Stream Player</h1>
-        <div id="videoPlayer"></div>
+        <h1 id="channel-name"></h1>
+        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <!-- Load VLC.js -->
-    <script src="https://unpkg.com/vlc.js@0.2.1/dist/vlc.js"></script>
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
+
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -63,21 +66,35 @@
 
         const errorMessage = document.getElementById('error-message');
 
-        // Attempt to play with VLC.js
-        try {
-            const vlc = new VLC();
-            vlc.video.src = streamUrl;
-            vlc.video.controls = true;
-            document.getElementById('videoPlayer').appendChild(vlc.video);
-            log("VLC.js player initialized.");
+        // Initialize Video.js player
+        const player = videojs('video');
 
-            vlc.video.addEventListener('error', () => {
-                errorMessage.innerText = 'Error: Unable to play the stream with VLC.js.';
-                log('Error encountered while trying to play the stream.');
+        player.ready(() => {
+            player.src({
+                src: streamUrl,
+                type: 'application/x-mpegURL'
             });
-        } catch (error) {
-            log("VLC.js fallback failed: " + error);
-            errorMessage.innerText = "Could not load VLC.js. Please try a different stream.";
+            player.play().catch(error => {
+                log('Video.js failed to start playing the stream.');
+                errorMessage.innerText = 'Error: Unable to play the stream with Video.js.';
+                loadWithShakaPlayer();
+            });
+
+            player.on('error', () => {
+                errorMessage.innerText = 'Error: Unable to play the stream.';
+                log('Error encountered while trying to play the stream.');
+                loadWithShakaPlayer();
+            });
+        });
+
+        function loadWithShakaPlayer() {
+            const shakaPlayer = new shaka.Player(video);
+            shakaPlayer.load(streamUrl).then(() => {
+                log('Shaka Player loaded the stream successfully.');
+            }).catch((error) => {
+                errorMessage.innerText = 'Error loading stream with Shaka Player: ' + error.message;
+                log('Error code ' + error.code + ', object ' + error);
+            });
         }
     </script>
 </body>
