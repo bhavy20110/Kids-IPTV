@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shaka Player Stream</title>
+    <title>Stream Player</title>
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -11,43 +12,72 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            text-align: center;
         }
-        #video {
-            width: 100%;
+        #videoContainer {
             max-width: 800px;
+            margin: auto;
+            text-align: center;
+            padding: 20px;
         }
-        #error-message {
+        h1 {
+            color: #ffffff;
+        }
+        .error-message {
             color: red;
-            margin-top: 10px;
+            margin-top: 20px;
+        }
+        #debug-log {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        #debug-log p {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-    <h1>Stream Player</h1>
-    <video id="video" controls crossorigin="anonymous" playsinline></video>
-    <div id="error-message"></div>
+    <div id="videoContainer">
+        <h1 id="channel-name"></h1>
+        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <div id="debug-log"></div>
+        <div class="error-message" id="error-message"></div>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
     <script>
-        const videoElement = document.getElementById('video');
+        const params = new URLSearchParams(window.location.search);
+        const streamUrl = decodeURIComponent(params.get('url'));
+        const channelName = decodeURIComponent(params.get('name'));
+
+        document.getElementById('channel-name').innerText = channelName;
+
+        const log = (message) => {
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
+        };
+
         const errorMessage = document.getElementById('error-message');
 
-        // Create a Shaka Player instance
-        const shakaPlayer = new shaka.Player(videoElement);
+        // Initialize Video.js player
+        const player = videojs('video');
 
-        // Enable debugging logs
-        shaka.log.setLevel(shaka.log.Level.DEBUG);
+        player.ready(() => {
+            player.src({
+                src: streamUrl,
+                type: 'application/x-mpegURL'
+            });
+            player.play();
 
-        // Define the stream URL
-        const streamUrl = 'http://game.denver1769.in/port/tp3.php?id=11639';
-
-        // Load the stream
-        shakaPlayer.load(streamUrl).then(() => {
-            console.log('Shaka Player loaded the stream successfully.');
-        }).catch((error) => {
-            errorMessage.innerText = 'Error loading stream with Shaka Player: ' + error.message;
-            console.error('Shaka Player error:', error);
+            player.on('error', () => {
+                errorMessage.innerText = 'Error: Unable to play the stream.';
+                log('Error encountered while trying to play the stream.');
+            });
         });
     </script>
 </body>
