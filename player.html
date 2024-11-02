@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
+    <link href="https://vjs.zencdn.net/7.21.1/video-js.css" rel="stylesheet" />
     <style>
         body {
             background-color: #121212;
@@ -13,18 +13,14 @@
             margin: 0;
             padding: 0;
         }
-        #videoContainer {
+        #video-container {
             max-width: 800px;
             margin: auto;
             text-align: center;
-            padding: 20px;
         }
-        h1 {
-            color: #ffffff;
-        }
-        .error-message {
+        #error-message {
             color: red;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         #debug-log {
             background-color: #333;
@@ -39,16 +35,15 @@
     </style>
 </head>
 <body>
-    <div id="videoContainer">
+    <div id="video-container">
         <h1 id="channel-name"></h1>
         <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <div id="error-message"></div>
         <div id="debug-log"></div>
-        <div class="error-message" id="error-message"></div>
     </div>
 
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.0.0/shaka-player.compiled.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -65,7 +60,7 @@
 
         const errorMessage = document.getElementById('error-message');
 
-        // Initialize Video.js player first
+        // Initialize Video.js player
         const player = videojs('video');
 
         player.ready(() => {
@@ -75,44 +70,24 @@
             });
             player.play();
 
-            player.on('error', async () => {
-                errorMessage.innerText = 'Video.js failed to play the stream, switching to Shaka Player.';
-                log('Video.js error encountered. Switching to Shaka Player.');
-                try {
-                    await initShakaPlayer(streamUrl);
-                } catch (error) {
-                    errorMessage.innerText = 'Error loading stream with Shaka Player: ' + error.message;
-                    log('Error loading stream with Shaka Player: ' + error.message);
-                }
+            player.on('error', () => {
+                errorMessage.innerText = 'Video.js: Error playing the stream. Switching to Shaka Player.';
+                log('Video.js encountered an error. Attempting to switch to Shaka Player.');
+
+                // Attempt to load the stream with Shaka Player
+                initShakaPlayer(streamUrl);
             });
         });
 
-        async function initShakaPlayer(url) {
-            // Check if Shaka Player is available
-            if (!shaka || !shaka.polyfill) {
-                errorMessage.innerText = 'Shaka Player is not available.';
-                return;
-            }
+        function initShakaPlayer(url) {
+            const shakaPlayer = new shaka.Player(videoElement);
 
-            // Install polyfills
-            shaka.polyfill.installAll();
-
-            // Create a Shaka Player instance
-            const shakaPlayer = new shaka.Player(document.getElementById('video'));
-
-            // Attach error event listener
-            shakaPlayer.addEventListener('error', (event) => {
-                errorMessage.innerText = 'Error with Shaka Player: ' + event.detail;
-                log('Shaka Player error: ' + event.detail);
+            shakaPlayer.load(url).then(() => {
+                log('Shaka Player loaded the stream successfully.');
+            }).catch((error) => {
+                errorMessage.innerText = 'Shaka Player: Error loading stream.';
+                log('Shaka Player error: ' + error.message);
             });
-
-            // Try to load the stream
-            try {
-                await shakaPlayer.load(url);
-                log('Shaka Player successfully loaded the stream.');
-            } catch (error) {
-                throw new Error('Error during Shaka Player load: ' + error);
-            }
         }
     </script>
 </body>
