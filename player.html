@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player</title>
-    <link href="https://vjs.zencdn.net/7.21.1/video-js.css" rel="stylesheet" />
+    <title>Shaka Player Stream</title>
     <style>
         body {
             background-color: #121212;
@@ -12,83 +11,41 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-        }
-        #video-container {
-            max-width: 800px;
-            margin: auto;
             text-align: center;
+        }
+        #video {
+            width: 100%;
+            max-width: 800px;
         }
         #error-message {
             color: red;
             margin-top: 10px;
         }
-        #debug-log {
-            background-color: #333;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        #debug-log p {
-            margin: 5px 0;
-        }
     </style>
 </head>
 <body>
-    <div id="video-container">
-        <h1 id="channel-name"></h1>
-        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
-        <div id="error-message"></div>
-        <div id="debug-log"></div>
-    </div>
+    <h1>Stream Player</h1>
+    <video id="video" controls crossorigin="anonymous" playsinline></video>
+    <div id="error-message"></div>
 
-    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const streamUrl = decodeURIComponent(params.get('url'));
-        const channelName = decodeURIComponent(params.get('name'));
-
-        document.getElementById('channel-name').innerText = channelName;
-
-        const log = (message) => {
-            const logContainer = document.getElementById('debug-log');
-            const logEntry = document.createElement('p');
-            logEntry.innerText = message;
-            logContainer.appendChild(logEntry);
-        };
-
+        const videoElement = document.getElementById('video');
         const errorMessage = document.getElementById('error-message');
 
-        // Initialize Video.js player
-        const player = videojs('video');
+        // Create a Shaka Player instance
+        const shakaPlayer = new shaka.Player(videoElement);
 
-        player.ready(() => {
-            player.src({
-                src: streamUrl,
-                type: 'application/x-mpegURL'
-            });
-            player.play();
+        // Define the stream URL
+        const streamUrl = 'http://game.denver1769.in/port/tp3.php?id=11639';
 
-            player.on('error', () => {
-                errorMessage.innerText = 'Video.js: Error playing the stream. Switching to Shaka Player.';
-                log('Video.js encountered an error. Attempting to switch to Shaka Player.');
-
-                // Attempt to load the stream with Shaka Player
-                initShakaPlayer(streamUrl);
-            });
+        // Load the stream
+        shakaPlayer.load(streamUrl).then(() => {
+            console.log('Shaka Player loaded the stream successfully.');
+        }).catch((error) => {
+            errorMessage.innerText = 'Error loading stream with Shaka Player: ' + error.message;
+            console.error('Shaka Player error:', error);
         });
-
-        function initShakaPlayer(url) {
-            const shakaPlayer = new shaka.Player(videoElement);
-
-            shakaPlayer.load(url).then(() => {
-                log('Shaka Player loaded the stream successfully.');
-            }).catch((error) => {
-                errorMessage.innerText = 'Shaka Player: Error loading stream.';
-                log('Shaka Player error: ' + error.message);
-            });
-        }
     </script>
 </body>
 </html>
