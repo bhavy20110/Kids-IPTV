@@ -119,15 +119,15 @@
                     loop: false,
                 });
 
-                // Check if the player is playing
-                jsmpegPlayer.on('error', (err) => {
+                // Handle JSMpeg player errors
+                jsmpegPlayer.onError = (err) => {
                     errorMessage.innerText = 'Error: JSMpeg failed to play the stream.';
-                    log('JSMpeg encountered an error: ' + err);
-                });
+                    log('JSMpeg encountered an error: ' + err.message);
+                };
 
                 // Set an interval to check if the player is playing
                 const checkPlayback = setInterval(() => {
-                    if (!jsmpegPlayer.isPlaying()) {
+                    if (jsmpegPlayer.paused) {
                         clearInterval(checkPlayback);
                         errorMessage.innerText = 'Error: JSMpeg failed to play the stream.';
                         log('JSMpeg failed to play the stream.');
@@ -145,4 +145,4 @@
         window.addEventListener('load', initializeVideoJS);
     </script>
 </body>
-</html>
+            </html>
