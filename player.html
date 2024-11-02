@@ -40,73 +40,48 @@
 </head>
 <body>
     <div id="videoContainer">
-        <h1 id="channel-name">Live Stream</h1>
-        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <h1 id="channel-name"></h1>
+        <div id="bitmovin-player"></div>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <!-- Video.js Library -->
-    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <!-- hls.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <!-- Flowplayer Library -->
-    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
-    
+    <script src="https://bitmovin.com/public/player/bitmovinplayer.js"></script>
     <script>
-        const streamUrl = "YOUR_STREAM_URL";  // Replace with your stream URL
-        const videoElement = document.getElementById('video');
+        const params = new URLSearchParams(window.location.search);
+        const streamUrl = decodeURIComponent(params.get('url'));
+        const channelName = decodeURIComponent(params.get('name'));
+
+        document.getElementById('channel-name').innerText = channelName;
+
+        const log = (message) => {
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
+        };
+
         const errorMessage = document.getElementById('error-message');
-        const debugLog = document.getElementById('debug-log');
-        
-        // Function to log messages
-        function logMessage(message) {
-            debugLog.innerHTML += `<p>${message}</p>`;
-        }
 
-        // Try Video.js first
-        const player = videojs(videoElement, {
-            techOrder: ["html5"],
-            sources: [{
-                src: streamUrl,
-                type: "application/x-mpegURL"
-            }]
-        });
+        // Initialize Bitmovin Player
+        const bitmovinPlayer = bitmovin.player('bitmovin-player');
 
-        player.on('error', function() {
-            logMessage("Video.js encountered an error. Trying hls.js...");
-            player.dispose(); // Dispose of Video.js player
-
-            // Attempt to use hls.js
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(videoElement);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    videoElement.play();
-                });
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) {
-                        logMessage("hls.js encountered an error: " + data.fatal);
-                        errorMessage.innerText = "Error: hls.js failed to load the stream. Trying Flowplayer...";
-
-                        // Attempt to use Flowplayer
-                        flowplayer("#videoContainer", {
-                            clip: {
-                                sources: [
-                                    { type: "application/x-mpegurl", src: streamUrl }
-                                ]
-                            }
-                        }).load().then(function(flowplayer) {
-                            logMessage("Flowplayer started successfully.");
-                        }).catch(function(error) {
-                            logMessage("Flowplayer failed to load the stream: " + error);
-                        });
-                    }
-                });
-            } else {
-                logMessage("hls.js is not supported.");
+        const conf = {
+            key: '0387c97e-4b79-484b-a519-489ba075ab1c',
+            source: {
+                hls: streamUrl
+            },
+            style: {
+                // Add custom styling if necessary
             }
+        };
+
+        bitmovinPlayer.load(conf).then(() => {
+            log('Bitmovin Player successfully loaded the stream.');
+            bitmovinPlayer.play();
+        }).catch((error) => {
+            errorMessage.innerText = 'Error: Unable to play the stream.';
+            log('Error encountered while trying to play the stream: ' + error);
         });
     </script>
 </body>
