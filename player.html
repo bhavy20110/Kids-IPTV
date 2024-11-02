@@ -48,8 +48,6 @@
 
     <!-- Video.js Library -->
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <!-- Dash.js for DASH streams -->
-    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <!-- JSMpeg for broader compatibility -->
     <script src="https://cdn.jsdelivr.net/npm/jsmpeg@0.3.0/jsmpeg.min.js"></script>
 
@@ -73,33 +71,17 @@
         // Attempt to initialize Video.js first
         try {
             player = videojs('video');
-            player.src({ src: streamUrl, type: 'application/dash+xml' });
+            player.src({ src: streamUrl, type: 'application/x-mpegURL' });
             player.play();
 
             player.on('error', () => {
                 errorMessage.innerText = 'Error: Video.js failed to load the stream.';
-                log('Video.js encountered an error. Trying Dash.js fallback.');
-                loadDashPlayer();
+                log('Video.js encountered an error. Trying JSMpeg fallback.');
+                loadJSMpegPlayer();
             });
         } catch (e) {
             log('Error initializing Video.js: ' + e.message);
-            loadDashPlayer();
-        }
-
-        function loadDashPlayer() {
-            if (dashjs.MediaPlayer.isSupported()) {
-                const dashPlayer = dashjs.MediaPlayer().create();
-                dashPlayer.initialize(document.getElementById('video'), streamUrl, true);
-
-                dashPlayer.on(dashjs.MediaPlayer.events.ERROR, () => {
-                    errorMessage.innerText = 'Error: Dash.js failed to load the stream.';
-                    log('Dash.js encountered an error. Trying JSMpeg fallback.');
-                    loadJSMpegPlayer();
-                });
-            } else {
-                log('Dash.js is not supported in this browser.');
-                loadJSMpegPlayer();
-            }
+            loadJSMpegPlayer();
         }
 
         function loadJSMpegPlayer() {
