@@ -103,15 +103,20 @@
                 const jsmpegPlayer = new JSMpeg.Player(streamUrl, {
                     canvas: canvas,
                     autoplay: true,
-                    loop: false
+                    loop: false,
+                    // Remove 'on' event handling for error, since it may not be supported
                 });
 
-                jsmpegPlayer.on('error', (e) => {
-                    errorMessage.innerText = 'Error: JSMpeg encountered an error while playing the stream.';
-                    log('JSMpeg encountered an error: ' + e.message);
-                });
+                // Set an interval to check if the player is playing
+                const checkPlayback = setInterval(() => {
+                    if (!jsmpegPlayer.isPlaying()) {
+                        clearInterval(checkPlayback);
+                        errorMessage.innerText = 'Error: JSMpeg failed to play the stream.';
+                        log('JSMpeg failed to play the stream.');
+                    }
+                }, 1000);
 
-                log('JSMpeg is playing the stream.');
+                log('JSMpeg is attempting to play the stream.');
             } catch (e) {
                 errorMessage.innerText = 'Error: JSMpeg failed to play the stream as well.';
                 log('JSMpeg encountered an error: ' + e.message);
@@ -122,4 +127,4 @@
         window.addEventListener('load', initializeVideoJS);
     </script>
 </body>
-    </html>
+</html>
