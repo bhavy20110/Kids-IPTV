@@ -66,7 +66,7 @@
         // Debug log and error message display elements
         const logContainer = document.getElementById('debug-log');
         const errorMessage = document.getElementById('error-message');
-        const videoElement = document.getElementById('video');
+        let videoElement = document.getElementById('video');
 
         // Utility function for logging
         const logMessage = (message) => {
@@ -77,6 +77,7 @@
 
         // Attempt playback with Video.js first
         function setupVideoJS() {
+            logMessage('Attempting playback with Video.js...');
             const player = videojs(videoElement);
 
             player.ready(() => {
@@ -87,7 +88,7 @@
                 player.play();
 
                 player.on('error', () => {
-                    logMessage('Video.js failed. Switching to Shaka Player.');
+                    logMessage('Video.js failed. Disposing and switching to Shaka Player.');
                     player.dispose();
                     setupShakaPlayer();
                 });
@@ -96,12 +97,14 @@
 
         // Fallback to Shaka Player if Video.js fails
         function setupShakaPlayer() {
+            logMessage('Attempting playback with Shaka Player...');
             if (shaka.Player.isBrowserSupported()) {
+                videoElement = document.getElementById('video'); // Re-select the video element
                 const shakaPlayer = new shaka.Player(videoElement);
 
                 shakaPlayer.addEventListener('error', (event) => {
                     logMessage('Shaka Player error: ' + event.detail.message);
-                    errorMessage.textContent = 'Error: Unable to play the stream with Shaka Player.';
+                    shakaPlayer.destroy();
                     setupPlyr();
                 });
 
@@ -110,7 +113,7 @@
                     videoElement.play();
                 }).catch((error) => {
                     logMessage('Error loading Shaka Player: ' + error.message);
-                    errorMessage.textContent = 'Error: Failed to load the video stream.';
+                    errorMessage.textContent = 'Error: Failed to load the video stream with Shaka Player.';
                     setupPlyr();
                 });
             } else {
@@ -121,7 +124,9 @@
 
         // Fallback to Plyr.io if Shaka Player also fails
         function setupPlyr() {
+            logMessage('Attempting playback with Plyr...');
             try {
+                videoElement = document.getElementById('video'); // Re-select the video element
                 const plyrPlayer = new Plyr(videoElement, {
                     captions: { active: true, language: 'en' },
                     settings: ['captions', 'quality', 'speed']
@@ -134,7 +139,7 @@
                     logMessage('Plyr error: ' + event.detail.message);
                     errorMessage.textContent = 'Error: Unable to play the stream with Plyr.';
                 });
-                logMessage('Switched to Plyr successfully.');
+                logMessage('Plyr successfully loaded.');
             } catch (error) {
                 logMessage('Error initializing Plyr: ' + error.message);
                 errorMessage.textContent = 'Error: All players failed to load the video stream.';
@@ -145,4 +150,4 @@
         setupVideoJS();
     </script>
 </body>
-    </html>
+</html>
