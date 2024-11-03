@@ -5,26 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.12/plyr.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <style>
         body {
             background-color: #121212;
             color: white;
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
+            padding: 0;
         }
         #videoContainer {
             max-width: 800px;
-            width: 100%;
+            margin: auto;
             text-align: center;
             padding: 20px;
         }
         h1 {
-            font-size: 24px;
             color: #ffffff;
         }
         .error-message {
@@ -37,8 +33,9 @@
             border-radius: 5px;
             margin-top: 20px;
             text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
+        }
+        #debug-log p {
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -50,104 +47,92 @@
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <!-- Include Video.js, Shaka Player, and Plyr.io scripts -->
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
-    <script src="https://cdn.plyr.io/3.6.12/plyr.polyfilled.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.1.1/shaka-player.compiled.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script> <!-- DASH.js for Plyr -->
     <script>
-        // Extract stream URL and channel name from query parameters
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
         document.getElementById('channel-name').innerText = channelName;
 
-        // Debug log and error message display elements
-        const logContainer = document.getElementById('debug-log');
-        const errorMessage = document.getElementById('error-message');
-        let videoElement = document.getElementById('video');
-
-        // Utility function for logging
         const logMessage = (message) => {
-            const entry = document.createElement('p');
-            entry.textContent = message;
-            logContainer.appendChild(entry);
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
         };
 
-        // Attempt playback with Video.js first
-        function setupVideoJS() {
+        const errorMessage = document.getElementById('error-message');
+
+        let videoElement = document.getElementById('video');
+        let player;
+
+        function initializeVideoJS() {
             logMessage('Attempting playback with Video.js...');
-            const player = videojs(videoElement);
+            player = videojs(videoElement);
+            player.src({ src: streamUrl, type: streamUrl.includes(".mpd") ? "application/dash+xml" : "application/x-mpegURL" });
+            player.play();
 
-            player.ready(() => {
-                player.src({
-                    src: streamUrl,
-                    type: 'application/x-mpegURL'
-                });
-                player.play();
-
-                player.on('error', () => {
-                    logMessage('Video.js failed. Disposing and switching to Shaka Player.');
-                    player.dispose();
-                    setupShakaPlayer();
-                });
+            player.on('error', () => {
+                logMessage('Video.js failed. Disposing and switching to Shaka Player.');
+                player.dispose();
+                initializeShakaPlayer();
             });
         }
 
-        // Fallback to Shaka Player if Video.js fails
-        function setupShakaPlayer() {
+        function initializeShakaPlayer() {
             logMessage('Attempting playback with Shaka Player...');
+            videoElement = document.getElementById('video');
             if (shaka.Player.isBrowserSupported()) {
-                videoElement = document.getElementById('video'); // Re-select the video element
-                const shakaPlayer = new shaka.Player(videoElement);
+                player = new shaka.Player(videoElement);
+                player.addEventListener('error', onErrorEvent);
 
-                shakaPlayer.addEventListener('error', (event) => {
-                    logMessage('Shaka Player error: ' + event.detail.message);
-                    shakaPlayer.destroy();
-                    setupPlyr();
-                });
-
-                shakaPlayer.load(streamUrl).then(() => {
-                    logMessage('Shaka Player successfully loaded.');
+                player.load(streamUrl).then(() => {
                     videoElement.play();
-                }).catch((error) => {
-                    logMessage('Error loading Shaka Player: ' + error.message);
-                    errorMessage.textContent = 'Error: Failed to load the video stream with Shaka Player.';
-                    setupPlyr();
-                });
+                }).catch(onErrorEvent);
             } else {
-                logMessage('Shaka Player is not supported on this browser.');
-                setupPlyr();
+                logMessage('Error: Shaka Player is not supported on this browser.');
+                initializePlyr();
             }
         }
 
-        // Fallback to Plyr.io if Shaka Player also fails
-        function setupPlyr() {
+        function onErrorEvent(event) {
+            logMessage('Error loading Shaka Player: ' + event.detail);
+            initializePlyr();
+        }
+
+        function initializePlyr() {
             logMessage('Attempting playback with Plyr...');
-            try {
-                videoElement = document.getElementById('video'); // Re-select the video element
-                const plyrPlayer = new Plyr(videoElement, {
-                    captions: { active: true, language: 'en' },
-                    settings: ['captions', 'quality', 'speed']
+            videoElement = document.getElementById('video'); 
+
+            if (streamUrl.includes(".m3u8") && Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(videoElement);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    player = new Plyr(videoElement);
+                    videoElement.play();
+                    logMessage('Plyr successfully loaded with HLS.js.');
                 });
-                plyrPlayer.source = {
-                    type: 'video',
-                    sources: [{ src: streamUrl, type: 'application/x-mpegURL' }]
-                };
-                plyrPlayer.on('error', (event) => {
-                    logMessage('Plyr error: ' + event.detail.message);
-                    errorMessage.textContent = 'Error: Unable to play the stream with Plyr.';
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    logMessage('Error with HLS.js in Plyr: ' + data.details);
+                    errorMessage.innerText = 'Error: Failed to load the video stream with all players.';
                 });
-                logMessage('Plyr successfully loaded.');
-            } catch (error) {
-                logMessage('Error initializing Plyr: ' + error.message);
-                errorMessage.textContent = 'Error: All players failed to load the video stream.';
+            } else if (streamUrl.includes(".mpd") && dashjs.MediaPlayer.isSupported()) {
+                const dashPlayer = dashjs.MediaPlayer().create();
+                dashPlayer.initialize(videoElement, streamUrl, true);
+                player = new Plyr(videoElement);
+                logMessage('Plyr successfully loaded with DASH.js.');
+            } else {
+                logMessage('Error: All players failed to load the video stream.');
+                errorMessage.innerText = 'Error: Failed to load the video stream with all players.';
             }
         }
 
-        // Start the player setup with Video.js
-        setupVideoJS();
+        initializeVideoJS();
     </script>
 </body>
 </html>
