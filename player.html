@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.12/plyr.css">
     <style>
         body {
             background-color: #121212;
             color: white;
             font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            padding: 0;
         }
         #videoContainer {
             max-width: 800px;
-            margin: auto;
+            width: 100%;
             text-align: center;
             padding: 20px;
         }
         h1 {
+            font-size: 24px;
             color: #ffffff;
         }
         .error-message {
@@ -32,9 +37,8 @@
             border-radius: 5px;
             margin-top: 20px;
             text-align: left;
-        }
-        #debug-log p {
-            margin: 5px 0;
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -46,65 +50,99 @@
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <!-- Video.js and Shaka Player scripts -->
+    <!-- Include Video.js, Shaka Player, and Plyr.io scripts -->
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@latest/dist/videojs-contrib-hls.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
+    <script src="https://cdn.plyr.io/3.6.12/plyr.polyfilled.js"></script>
 
     <script>
+        // Extract stream URL and channel name from query parameters
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
-
         document.getElementById('channel-name').innerText = channelName;
 
-        const log = (message) => {
-            const logContainer = document.getElementById('debug-log');
-            const logEntry = document.createElement('p');
-            logEntry.innerText = message;
-            logContainer.appendChild(logEntry);
-        };
-
+        // Debug log and error message display elements
+        const logContainer = document.getElementById('debug-log');
         const errorMessage = document.getElementById('error-message');
         const videoElement = document.getElementById('video');
 
-        // Initialize Video.js player
-        const player = videojs(videoElement);
+        // Utility function for logging
+        const logMessage = (message) => {
+            const entry = document.createElement('p');
+            entry.textContent = message;
+            logContainer.appendChild(entry);
+        };
 
-        player.ready(() => {
-            player.src({
-                src: streamUrl,
-                type: 'application/x-mpegURL'
+        // Attempt playback with Video.js first
+        function setupVideoJS() {
+            const player = videojs(videoElement);
+
+            player.ready(() => {
+                player.src({
+                    src: streamUrl,
+                    type: 'application/x-mpegURL'
+                });
+                player.play();
+
+                player.on('error', () => {
+                    logMessage('Video.js failed. Switching to Shaka Player.');
+                    player.dispose();
+                    setupShakaPlayer();
+                });
             });
-            player.play();
+        }
 
-            player.on('error', () => {
-                log('Error encountered with Video.js. Switching to Shaka Player.');
-                player.dispose(); // Dispose Video.js player before switching
-                initializeShakaPlayer();
-            });
-        });
-
-        function initializeShakaPlayer() {
+        // Fallback to Shaka Player if Video.js fails
+        function setupShakaPlayer() {
             if (shaka.Player.isBrowserSupported()) {
                 const shakaPlayer = new shaka.Player(videoElement);
 
-                shakaPlayer.addEventListener('error', onShakaError);
+                shakaPlayer.addEventListener('error', (event) => {
+                    logMessage('Shaka Player error: ' + event.detail.message);
+                    errorMessage.textContent = 'Error: Unable to play the stream with Shaka Player.';
+                    setupPlyr();
+                });
+
                 shakaPlayer.load(streamUrl).then(() => {
-                    log('Shaka Player is playing the stream.');
+                    logMessage('Shaka Player successfully loaded.');
                     videoElement.play();
-                }).catch(onShakaError);
+                }).catch((error) => {
+                    logMessage('Error loading Shaka Player: ' + error.message);
+                    errorMessage.textContent = 'Error: Failed to load the video stream.';
+                    setupPlyr();
+                });
             } else {
-                errorMessage.innerText = 'Error: Neither Video.js nor Shaka Player are supported on this browser.';
-                log('Error: Shaka Player is not supported on this browser.');
+                logMessage('Shaka Player is not supported on this browser.');
+                setupPlyr();
             }
         }
 
-        function onShakaError(event) {
-            const error = event.detail;
-            errorMessage.innerText = 'Error: Unable to play the stream with Shaka Player.';
-            log('Shaka Player error: ' + error.message);
+        // Fallback to Plyr.io if Shaka Player also fails
+        function setupPlyr() {
+            try {
+                const plyrPlayer = new Plyr(videoElement, {
+                    captions: { active: true, language: 'en' },
+                    settings: ['captions', 'quality', 'speed']
+                });
+                plyrPlayer.source = {
+                    type: 'video',
+                    sources: [{ src: streamUrl, type: 'application/x-mpegURL' }]
+                };
+                plyrPlayer.on('error', (event) => {
+                    logMessage('Plyr error: ' + event.detail.message);
+                    errorMessage.textContent = 'Error: Unable to play the stream with Plyr.';
+                });
+                logMessage('Switched to Plyr successfully.');
+            } catch (error) {
+                logMessage('Error initializing Plyr: ' + error.message);
+                errorMessage.textContent = 'Error: All players failed to load the video stream.';
+            }
         }
+
+        // Start the player setup with Video.js
+        setupVideoJS();
     </script>
 </body>
-</html>
+    </html>
