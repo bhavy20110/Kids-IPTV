@@ -1,9 +1,11 @@
-const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+// Proxy server URL
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
 
-fetch(PROXY_URL + 'M3UPlus-Playlist-20241019222427.m3u')
+// Fetch the M3U playlist through the proxy server
+fetch(`${proxyUrl}https://example.com/path/to/M3UPlus-Playlist-20241019222427.m3u`)
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+            throw new Error('Network response was not ok');
         }
         return response.text();
     })
