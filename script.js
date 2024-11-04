@@ -1,6 +1,8 @@
-// Fetch the local M3U playlist using a public CORS proxy
-const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-const m3uUrl = 'M3UPlus-Playlist-20241019222427.m3u'; // Replace with your M3U file URL
+// Fetch the M3U playlist using a public CORS proxy
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Ensure this proxy is operational
+const m3uUrl = 'https://bit.ly/kids-favourite-playlist'; // Your M3U file URL
+
+// Fetching the M3U file through the proxy
 fetch(proxyUrl + m3uUrl)
     .then(response => {
         if (!response.ok) {
