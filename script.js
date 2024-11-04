@@ -1,5 +1,7 @@
-// Fetch the local M3U playlist
-fetch('M3UPlus-Playlist-20241019222427.m3u')
+// Fetch the local M3U playlist using a public CORS proxy
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+const m3uUrl = 'M3UPlus-Playlist-20241019222427.m3u'; // Replace with your M3U file URL
+fetch(proxyUrl + m3uUrl)
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok: ' + response.statusText);
@@ -13,7 +15,7 @@ fetch('M3UPlus-Playlist-20241019222427.m3u')
     })
     .catch(error => console.error('Error fetching M3U file:', error));
 
-// Function to parse the M3U file
+// Function to parse the M3U file (remains unchanged)
 function parseM3U(data) {
     const lines = data.split('\n');
     const channels = [];
@@ -47,7 +49,7 @@ function parseM3U(data) {
     return channels;
 }
 
-// Display channels in the HTML
+// Display channels in the HTML (remains unchanged)
 function displayChannels(channels) {
     const container = document.getElementById('channel-list');
     container.innerHTML = ''; // Clear any existing content
@@ -71,4 +73,4 @@ function displayChannels(channels) {
 
 function playStream(url, name) {
     window.location.href = `player.html?url=${url}&name=${name}`;
-        }
+}
