@@ -53,17 +53,15 @@ function displayChannels(channels) {
             console.log('Displaying channel:', channel); // Debug each channel
             const channelDiv = document.createElement('div');
             channelDiv.classList.add('channel');
-            channelDiv.innerHTML = `
+            channelDiv.innerHTML = 
                 <img src="${channel.logo || 'path/to/default_logo.png'}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
                 <p>${channel.name}</p>
-            `;
+            ;
             container.appendChild(channelDiv);
         });
     }
 }
 
 function playStream(url, name) {
-    // Modify the URL to go through the Vercel proxy
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-    window.location.href = `player.html?url=${proxyUrl}&name=${encodeURIComponent(name)}`;
+    window.location.href = player.html?url=${url}&name=${name};
 }
