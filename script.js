@@ -1,7 +1,4 @@
-// script.js
-
-// Function to fetch the M3U file via CORS proxy
-fetch(`/api/cors-proxy?url=${encodeURIComponent('M3UPlus-Playlist-20241019222427.m3u')}`)
+fetch('M3UPlus-Playlist-20241019222427.m3u')
     .then(response => response.text())
     .then(data => {
         const channels = parseM3U(data);
@@ -10,7 +7,6 @@ fetch(`/api/cors-proxy?url=${encodeURIComponent('M3UPlus-Playlist-20241019222427
     })
     .catch(error => console.error('Error fetching M3U file:', error));
 
-// Function to parse the M3U data
 function parseM3U(data) {
     const lines = data.split('\n');
     const channels = [];
@@ -19,20 +15,32 @@ function parseM3U(data) {
     lines.forEach(line => {
         line = line.trim();
         if (line.startsWith('#EXTINF:')) {
-            const channelInfo = line.split(',');
-            const name = channelInfo[1] || 'Unknown Channel';
-            const logo = channelInfo[2] || null; // Assuming the logo URL is provided in EXTINF
-            currentChannel = { name, logo };
+            if (currentChannel.name) {
+                channels.push(currentChannel);
+                currentChannel = {};
+            }
+            const nameMatch = line.match(/,(.+)$/);
+            const logoMatch = line.match(/tvg-logo="([^"]+)"/); // Extracts logo from M3U
+            if (nameMatch) {
+                currentChannel.name = nameMatch[1].trim();
+            }
+            if (logoMatch) {
+                currentChannel.logo = logoMatch[1];
+            }
         } else if (line && !line.startsWith('#')) {
-            currentChannel.url = line; // This line should be the URL
-            channels.push(currentChannel);
+            currentChannel.url = line.trim();
         }
     });
+
+    // Push last channel if exists
+    if (currentChannel.name) {
+        channels.push(currentChannel);
+    }
 
     return channels;
 }
 
-// Function to display channels on the page
+// Display channels in the HTML
 function displayChannels(channels) {
     const container = document.getElementById('channel-list');
     container.innerHTML = ''; // Clear any existing content
@@ -54,7 +62,8 @@ function displayChannels(channels) {
     }
 }
 
-// Function to handle playing the stream
 function playStream(url, name) {
-    window.location.href = `player.html?url=${url}&name=${name}`;
+    // Modify the URL to go through the Vercel proxy
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+    window.location.href = `player.html?url=${proxyUrl}&name=${encodeURIComponent(name)}`;
 }
