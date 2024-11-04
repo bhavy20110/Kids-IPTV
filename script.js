@@ -1,11 +1,10 @@
-// Proxy server URL
-const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+const PROXY_URL = 'https://thingproxy.freeboard.io/fetch/'; // Use a different CORS proxy
+const M3U_URL = 'M3UPlus-Playlist-20241019222427.m3u'; // Your M3U file URL
 
-// Fetch the M3U playlist through the proxy server
-fetch(`${proxyUrl}https://example.com/path/to/M3UPlus-Playlist-20241019222427.m3u`)
+fetch(PROXY_URL + encodeURIComponent(M3U_URL))
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Network response was not ok: ' + response.statusText);
         }
         return response.text();
     })
