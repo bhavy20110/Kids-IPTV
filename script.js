@@ -1,5 +1,12 @@
-fetch('M3UPlus-Playlist-20241019222427.m3u')
-    .then(response => response.text())
+const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+
+fetch(PROXY_URL + 'M3UPlus-Playlist-20241019222427.m3u')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.text();
+    })
     .then(data => {
         const channels = parseM3U(data);
         console.log('Parsed Channels:', channels); // Debugging: Logs parsed channels
