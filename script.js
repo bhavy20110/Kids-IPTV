@@ -1,7 +1,5 @@
-const PROXY_URL = 'https://thingproxy.freeboard.io/fetch/'; // Use a different CORS proxy
-const M3U_URL = 'M3UPlus-Playlist-20241019222427.m3u'; // Your M3U file URL
-
-fetch(PROXY_URL + encodeURIComponent(M3U_URL))
+// Fetch the local M3U playlist
+fetch('M3UPlus-Playlist-20241019222427.m3u')
     .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok: ' + response.statusText);
@@ -15,6 +13,7 @@ fetch(PROXY_URL + encodeURIComponent(M3U_URL))
     })
     .catch(error => console.error('Error fetching M3U file:', error));
 
+// Function to parse the M3U file
 function parseM3U(data) {
     const lines = data.split('\n');
     const channels = [];
@@ -72,4 +71,4 @@ function displayChannels(channels) {
 
 function playStream(url, name) {
     window.location.href = `player.html?url=${url}&name=${name}`;
-}
+        }
