@@ -38,8 +38,8 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name">Stream Player</h1>
-        <!-- Native video player with flv.js for .ts format -->
-        <video id="flv-player" controls crossorigin="anonymous" playsinline style="width: 100%; display: none;"></video>
+        <!-- DPlayer instance -->
+        <div id="dplayer" style="display: none;"></div>
         
         <!-- Video.js player as fallback -->
         <video id="video-js-player" class="video-js vjs-default-skin" controls style="width: 100%; display: none;">
@@ -51,7 +51,9 @@
         </div>
     </div>
 
-    <!-- flv.js library -->
+    <!-- DPlayer library -->
+    <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+    <!-- flv.js library (for DPlayer to handle .ts) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.5.0/flv.min.js"></script>
     <!-- Video.js library -->
     <script src="https://vjs.zencdn.net/7.17.0/video.min.js"></script>
@@ -61,7 +63,7 @@
         const m3u8Url = 'https://path-to-your-fallback.m3u8'; // Fallback .m3u8 URL
         const mpdUrl = 'https://path-to-your-fallback.mpd'; // Fallback .mpd URL
 
-        const flvPlayer = document.getElementById('flv-player');
+        const dplayerContainer = document.getElementById('dplayer');
         const videoJsPlayer = document.getElementById('video-js-player');
         const debugOutput = document.getElementById('debug-output');
 
@@ -71,39 +73,48 @@
             debugOutput.appendChild(p);
         }
 
-        // Attempt to play using flv.js for .ts files
-        if (flvjs.isSupported()) {
-            const flv = flvjs.createPlayer({
-                type: 'flv',
-                url: tsUrl,
+        // Attempt to play using DPlayer for .ts files
+        try {
+            const dp = new DPlayer({
+                container: dplayerContainer,
+                video: {
+                    url: tsUrl,
+                    type: 'customFlv', // Specify for ts files in flv.js format
+                    customType: {
+                        customFlv: function (video, player) {
+                            if (flvjs.isSupported()) {
+                                const flvPlayer = flvjs.createPlayer({
+                                    type: 'flv',
+                                    url: tsUrl,
+                                });
+                                flvPlayer.attachMediaElement(video);
+                                flvPlayer.load();
+                                flvPlayer.play().then(() => {
+                                    logDebug('DPlayer successfully loaded the .ts stream with flv.js.');
+                                    dplayerContainer.style.display = 'block';
+                                }).catch(error => {
+                                    logDebug('DPlayer failed to play .ts stream. Switching to Video.js fallback.');
+                                    switchToVideoJs();
+                                });
+                            } else {
+                                logDebug('flv.js not supported. Switching to Video.js fallback.');
+                                switchToVideoJs();
+                            }
+                        }
+                    }
+                }
             });
-            flv.attachMediaElement(flvPlayer);
-            flv.load();
-            flvPlayer.style.display = 'block';
-
-            flv.play().then(() => {
-                logDebug('flv.js successfully loaded the .ts stream.');
-            }).catch(error => {
-                logDebug('flv.js failed to play. Attempting Video.js fallback.');
-                switchToVideoJs();
-            });
-
-            flv.on(flvjs.Events.ERROR, (type, detail) => {
-                logDebug(`flv.js error: ${type}. Switching to Video.js fallback.`);
-                switchToVideoJs();
-            });
-        } else {
-            logDebug('flv.js not supported. Attempting Video.js fallback.');
+        } catch (error) {
+            logDebug('DPlayer initialization failed. Attempting Video.js fallback.');
             switchToVideoJs();
         }
 
         // Function to switch to Video.js player
         function switchToVideoJs() {
-            flvPlayer.style.display = 'none';
+            dplayerContainer.style.display = 'none';
             videoJsPlayer.style.display = 'block';
 
             const videoJs = videojs(videoJsPlayer);
-            videoJsPlayer.src = [{ src: m3u8Url, type: 'application/x-mpegURL' }];
             videoJs.src({ src: m3u8Url, type: 'application/x-mpegURL' });
             videoJs.play().catch(error => {
                 logDebug('Video.js failed to autoplay with .m3u8 format.');
