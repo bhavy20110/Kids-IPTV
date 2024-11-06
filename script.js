@@ -11,7 +11,10 @@ fetch('M3UPlus-Playlist-20241019222427.m3u')
         console.log('Parsed Channels:', channels); // Debugging: Logs parsed channels
         displayChannels(channels);
     })
-    .catch(error => console.error('Error fetching M3U file:', error));
+    .catch(error => {
+        console.error('Error fetching M3U file:', error);
+        document.getElementById('channel-list').innerHTML = `<p class="error-message">Failed to load channels: ${error.message}</p>`;
+    });
 
 // Function to parse the M3U file and extract channel information
 function parseM3U(data) {
@@ -61,9 +64,8 @@ function displayChannels(channels) {
             const channelDiv = document.createElement('div');
             channelDiv.classList.add('channel');
             channelDiv.innerHTML = 
-                <img src="${channel.logo || 'path/to/default_logo.png'}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
-                <p>${channel.name}</p>
-            ;
+                `<img src="${channel.logo || 'path/to/default_logo.png'}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
+                <p>${channel.name}</p>`;
             container.appendChild(channelDiv);
         });
     }
@@ -71,5 +73,5 @@ function displayChannels(channels) {
 
 // Function to navigate to player.html with URL parameters for streaming
 function playStream(url, name) {
-    window.location.href = player.html?url=${url}&name=${name};
+    window.location.href = `player.html?url=${url}&name=${name}`;
 }
