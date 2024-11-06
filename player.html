@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TS Stream Loop</title>
+    <title>Stream Player with Fallback</title>
+    <link href="https://vjs.zencdn.net/7.17.0/video-js.css" rel="stylesheet" />
     <style>
         body {
             background-color: #121212;
@@ -36,51 +37,82 @@
 </head>
 <body>
     <div id="videoContainer">
-        <h1 id="channel-name">TS Stream</h1>
-        <video id="video" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
-        <div id="debug-log"></div>
-        <div class="error-message" id="error-message"></div>
+        <h1 id="channel-name">Stream Player</h1>
+        <!-- Native video player with HLS.js for .ts format -->
+        <video id="hls-player" controls crossorigin="anonymous" playsinline style="width: 100%; display: none;"></video>
+        
+        <!-- Video.js player as fallback -->
+        <video id="video-js-player" class="video-js vjs-default-skin" controls style="width: 100%; display: none;">
+            <source id="video-js-source" type="application/x-mpegURL">
+        </video>
+        
+        <div id="debug-log">
+            <p id="debug-output">Attempting playback...</p>
+        </div>
     </div>
 
+    <!-- HLS.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- Video.js library -->
+    <script src="https://vjs.zencdn.net/7.17.0/video.min.js"></script>
+
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const streamUrl = decodeURIComponent(params.get('url'));
-        const channelName = decodeURIComponent(params.get('name'));
-        document.getElementById('channel-name').innerText = channelName;
+        const hlsUrl = 'https://path-to-your-ts-file-or-hls-stream.ts'; // Replace with your .ts URL
+        const m3u8Url = 'https://path-to-your-fallback.m3u8'; // Fallback .m3u8 URL
+        const mpdUrl = 'https://path-to-your-fallback.mpd'; // Fallback .mpd URL
 
-        const logMessage = (message) => {
-            const logContainer = document.getElementById('debug-log');
-            const logEntry = document.createElement('p');
-            logEntry.innerText = message;
-            logContainer.appendChild(logEntry);
-        };
+        const hlsPlayer = document.getElementById('hls-player');
+        const videoJsPlayer = document.getElementById('video-js-player');
+        const debugOutput = document.getElementById('debug-output');
 
-        const errorMessage = document.getElementById('error-message');
-        const videoElement = document.getElementById('video');
-        
-        function playTsStream() {
-            logMessage('Attempting playback with TS stream directly...');
-            videoElement.src = streamUrl;
-            videoElement.play().catch((error) => {
-                logMessage('TS player failed to load stream.');
-                errorMessage.innerText = 'Error: Unable to play the TS stream.';
-            });
+        function logDebug(message) {
+            const p = document.createElement('p');
+            p.textContent = message;
+            debugOutput.appendChild(p);
         }
 
-        // Reload the TS stream if it stops (end event)
-        videoElement.addEventListener('ended', () => {
-            logMessage('Stream ended. Reloading the TS stream to continue playback...');
-            playTsStream();
-        });
+        // Attempt to play using HLS.js
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(hlsUrl);
+            hls.attachMedia(hlsPlayer);
+            hlsPlayer.style.display = 'block';
 
-        // If there's an error loading the video, display a message
-        videoElement.addEventListener('error', () => {
-            logMessage('Error: Could not load the TS stream.');
-            errorMessage.innerText = 'Error: Unable to load the TS stream.';
-        });
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                logDebug('HLS.js successfully loaded the .ts stream.');
+                hlsPlayer.play().catch(error => {
+                    logDebug('HLS.js failed to autoplay. Attempting Video.js fallback.');
+                    switchToVideoJs();
+                });
+            });
 
-        // Start playing the TS stream initially
-        playTsStream();
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    logDebug('HLS.js encountered a fatal error. Switching to Video.js fallback.');
+                    switchToVideoJs();
+                }
+            });
+        } else {
+            logDebug('HLS.js not supported. Attempting Video.js fallback.');
+            switchToVideoJs();
+        }
+
+        // Function to switch to Video.js player
+        function switchToVideoJs() {
+            hlsPlayer.style.display = 'none';
+            videoJsPlayer.style.display = 'block';
+
+            const videoJs = videojs(videoJsPlayer);
+            videoJsPlayer.src = [{ src: m3u8Url, type: 'application/x-mpegURL' }];
+            videoJs.src({ src: m3u8Url, type: 'application/x-mpegURL' });
+            videoJs.play().catch(error => {
+                logDebug('Video.js failed to autoplay with .m3u8 format.');
+                videoJs.src({ src: mpdUrl, type: 'application/dash+xml' });
+                videoJs.play().catch(() => {
+                    logDebug('Video.js failed to play with both .m3u8 and .mpd formats.');
+                });
+            });
+        }
     </script>
 </body>
 </html>
