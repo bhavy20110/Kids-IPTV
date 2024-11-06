@@ -79,7 +79,11 @@
             });
         }
 
-        initializeVideoJS();
+        if (streamUrl) {
+            initializeVideoJS();
+        } else {
+            errorMessage.innerText = 'Error: Invalid stream URL.';
+        }
     </script>
 </body>
 </html>
