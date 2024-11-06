@@ -11,7 +11,10 @@ fetch('M3UPlus-Playlist-20241019222427.m3u')
         console.log('Parsed Channels:', channels); // Debugging: Logs parsed channels
         displayChannels(channels);
     })
-    .catch(error => console.error('Error fetching M3U file:', error));
+    .catch(error => {
+        console.error('Error fetching M3U file:', error);
+        document.getElementById('channel-list').innerHTML = `<p class="error-message">Failed to load channels: ${error.message}</p>`;
+    });
 
 // Function to parse the M3U file and extract channel information
 function parseM3U(data) {
