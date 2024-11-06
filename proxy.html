@@ -17,6 +17,10 @@
             window.location.href = 'index.html'; // Go back to the homepage
         }
 
+        // Debug log to check the stream URL and name
+        console.log("Stream URL:", streamUrl);
+        console.log("Channel Name:", channelName);
+
         // Redirect to the player page with the stream URL as a query parameter
         const playerUrl = `player.html?url=${encodeURIComponent(streamUrl)}&name=${encodeURIComponent(channelName)}`;
         window.location.href = playerUrl;
