@@ -69,6 +69,7 @@
             const player = new shaka.Player(videoElement);
 
             if (streamUrl.includes('.mpd')) {
+                logMessage('Loading MPD stream...');
                 player.load(streamUrl).then(() => {
                     logMessage('Playback started with MPD stream');
                 }).catch((error) => {
@@ -76,6 +77,12 @@
                     errorMessage.innerText = 'Error: Unable to load MPD stream.';
                 });
             } else if (streamUrl.includes('.m3u8')) {
+                logMessage('Loading M3U8 stream...');
+                // Attempt to load M3U8 stream using Shaka Player's HLS support
+                const hlsConfig = {
+                    // Configuration options (if needed)
+                };
+                player.configure(hlsConfig);
                 player.load(streamUrl).then(() => {
                     logMessage('Playback started with M3U8 stream');
                 }).catch((error) => {
@@ -103,7 +110,12 @@
                 const sourceBuffer = mediaSource.addSourceBuffer('video/mp2t'); // TS MIME type
                 
                 fetch(streamUrl)
-                    .then(response => response.arrayBuffer())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.arrayBuffer();
+                    })
                     .then(data => {
                         sourceBuffer.appendBuffer(data);
                     })
