@@ -1,20 +1,17 @@
+const fs = require('fs'); // Node.js file system module to read the M3U file
+
 // Fetch the local M3U playlist
-fetch('M3UPlus-Playlist-20241019222427.m3u')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
-        }
-        return response.text();
-    })
-    .then(data => {
-        const channels = parseM3U(data);
-        console.log('Parsed Channels:', channels); // Debugging: Logs parsed channels
-        displayChannels(channels);
-    })
-    .catch(error => {
-        console.error('Error fetching M3U file:', error);
-        document.getElementById('channel-list').innerHTML = `<p class="error-message">Failed to load channels: ${error.message}</p>`;
-    });
+fs.readFile('M3UPlus-Playlist-20241019222427.m3u', 'utf-8', (err, data) => {
+    if (err) {
+        console.error('Error reading M3U file:', err);
+        document.getElementById('channel-list').innerHTML = `<p class="error-message">Failed to load channels: ${err.message}</p>`;
+        return;
+    }
+    
+    const channels = parseM3U(data);
+    console.log('Parsed Channels:', channels); // Debugging: Logs parsed channels
+    displayChannels(channels);
+});
 
 // Function to parse the M3U file and extract channel information
 function parseM3U(data) {
