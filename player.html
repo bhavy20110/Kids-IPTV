@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player with Fallback</title>
-    <link href="https://vjs.zencdn.net/7.17.0/video-js.css" rel="stylesheet" />
+    <title>Stream Player</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             background-color: #121212;
@@ -18,6 +18,13 @@
             margin: auto;
             text-align: center;
             padding: 20px;
+        }
+        h1 {
+            color: #ffffff;
+        }
+        .error-message {
+            color: red;
+            margin-top: 20px;
         }
         #debug-log {
             background-color: #333;
@@ -33,95 +40,85 @@
 </head>
 <body>
     <div id="videoContainer">
-        <h1 id="channel-name">Stream Player</h1>
-        <!-- Flowplayer container -->
-        <div id="flowplayer" style="display: none;"></div>
-        
-        <!-- Video.js player as fallback -->
-        <video id="video-js-player" class="video-js vjs-default-skin" controls style="width: 100%; display: none;">
-            <source id="video-js-source" type="application/x-mpegURL">
-        </video>
-        
-        <div id="debug-log">
-            <p id="debug-output">Attempting playback...</p>
-        </div>
+        <h1 id="channel-name"></h1>
+        <div id="video"></div> <!-- Shaka Player will be injected here -->
+        <div id="debug-log"></div>
+        <div class="error-message" id="error-message"></div>
     </div>
 
-    <!-- Flowplayer library -->
-    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
-    <!-- Video.js library -->
-    <script src="https://vjs.zencdn.net/7.17.0/video.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.0.0/shaka-player.compiled.min.js"></script>
     <script>
-        const tsUrl = 'https://path-to-your-ts-file-or-stream.ts'; // Replace with your .ts URL
-        const m3u8Url = 'https://path-to-your-fallback.m3u8'; // Fallback .m3u8 URL
-        const mpdUrl = 'https://path-to-your-fallback.mpd'; // Fallback .mpd URL
+        const params = new URLSearchParams(window.location.search);
+        const streamUrl = decodeURIComponent(params.get('url'));
+        const channelName = decodeURIComponent(params.get('name'));
+        document.getElementById('channel-name').innerText = channelName;
 
-        const flowplayerContainer = document.getElementById('flowplayer');
-        const videoJsPlayer = document.getElementById('video-js-player');
-        const debugOutput = document.getElementById('debug-output');
+        const logMessage = (message) => {
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
+        };
 
-        function logDebug(message) {
-            const p = document.createElement('p');
-            p.textContent = message;
-            debugOutput.appendChild(p);
+        const errorMessage = document.getElementById('error-message');
+        const videoElement = document.getElementById('video');
+
+        // Initialize Shaka Player for M3U8 and MPD
+        function initializeShakaPlayer() {
+            logMessage('Attempting playback with Shaka Player...');
+            const player = new shaka.Player(videoElement);
+
+            if (streamUrl.includes('.mpd')) {
+                player.load(streamUrl).then(() => {
+                    logMessage('Playback started with MPD stream');
+                }).catch((error) => {
+                    logMessage('Error with MPD stream: ' + error);
+                    errorMessage.innerText = 'Error: Unable to load MPD stream.';
+                });
+            } else if (streamUrl.includes('.m3u8')) {
+                player.load(streamUrl).then(() => {
+                    logMessage('Playback started with M3U8 stream');
+                }).catch((error) => {
+                    logMessage('Error with M3U8 stream: ' + error);
+                    errorMessage.innerText = 'Error: Unable to load M3U8 stream.';
+                });
+            } else {
+                // Fallback to TS stream handling
+                logMessage('Attempting TS stream playback...');
+                handleTSStream();
+            }
         }
 
-        // Attempt to play using Flowplayer for .ts files
-        function tryFlowplayer() {
-            logDebug('Attempting playback with Flowplayer...');
-            flowplayerContainer.style.display = 'block';
-            flowplayerContainer.innerHTML = `<video id="flowplayer-video" controls></video>`;
-            const videoElement = document.getElementById("flowplayer-video");
+        // Handle TS stream using Media Source Extensions (MSE)
+        function handleTSStream() {
+            const tsPlayer = document.createElement('video');
+            tsPlayer.controls = true;
+            tsPlayer.autoplay = true;
 
-            flowplayer(videoElement, {
-                clip: {
-                    sources: [
-                        { type: "video/MP2T", src: tsUrl }
-                    ]
-                }
+            // Set up MSE
+            const mediaSource = new MediaSource();
+            tsPlayer.src = URL.createObjectURL(mediaSource);
+            
+            mediaSource.addEventListener('sourceopen', () => {
+                const sourceBuffer = mediaSource.addSourceBuffer('video/mp2t'); // TS MIME type
+                
+                fetch(streamUrl)
+                    .then(response => response.arrayBuffer())
+                    .then(data => {
+                        sourceBuffer.appendBuffer(data);
+                    })
+                    .catch((error) => {
+                        logMessage('Error loading TS stream data: ' + error);
+                        errorMessage.innerText = 'Error: Unable to load TS stream.';
+                    });
             });
 
-            videoElement.onplay = function () {
-                logDebug('Flowplayer is playing the .ts stream.');
-            };
-
-            videoElement.onerror = function () {
-                logDebug('Flowplayer failed to play .ts stream. Switching to Video.js fallback.');
-                flowplayerContainer.style.display = 'none';
-                tryVideoJs();
-            };
+            videoElement.innerHTML = ''; // Clear existing content
+            videoElement.appendChild(tsPlayer);
         }
 
-        // Attempt to play using Video.js for m3u8
-        function tryVideoJs() {
-            logDebug('Attempting playback with Video.js for .m3u8...');
-            videoJsPlayer.style.display = 'block';
-            const videoJs = videojs(videoJsPlayer);
-            videoJs.src({ src: m3u8Url, type: 'application/x-mpegURL' });
-
-            videoJs.play().then(() => {
-                logDebug('Video.js is playing the .m3u8 stream.');
-            }).catch(error => {
-                logDebug('Video.js failed to play with .m3u8 format. Attempting .mpd format.');
-                tryVideoJsMpd();
-            });
-        }
-
-        // Attempt to play using Video.js for mpd
-        function tryVideoJsMpd() {
-            const videoJs = videojs(videoJsPlayer);
-            videoJs.src({ src: mpdUrl, type: 'application/dash+xml' });
-
-            videoJs.play().then(() => {
-                logDebug('Video.js is playing the .mpd stream.');
-            }).catch(error => {
-                logDebug('Video.js failed to play with both .m3u8 and .mpd formats.');
-            });
-        }
-
-        // Start the playback attempts
-        tryFlowplayer();
+        // Initialize the Shaka Player for MPD/M3U8 or TS playback
+        initializeShakaPlayer();
     </script>
 </body>
 </html>
