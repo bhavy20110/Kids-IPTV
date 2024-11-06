@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.18.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -26,111 +26,54 @@
             color: red;
             margin-top: 20px;
         }
-        #debug-log {
-            background-color: #333;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-            text-align: left;
-        }
-        #debug-log p {
-            margin: 5px 0;
-        }
     </style>
 </head>
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <div id="video"></div> <!-- Shaka Player will be injected here -->
-        <div id="debug-log"></div>
+        <video id="my-video" class="video-js vjs-default-skin" controls></video>
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/3.0.0/shaka-player.compiled.min.js"></script>
+    <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@2.0.0/dist/videojs-contrib-hls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-dash@2.10.0/dist/videojs-contrib-dash.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
         document.getElementById('channel-name').innerText = channelName;
 
-        const logMessage = (message) => {
-            const logContainer = document.getElementById('debug-log');
-            const logEntry = document.createElement('p');
-            logEntry.innerText = message;
-            logContainer.appendChild(logEntry);
-        };
-
-        const errorMessage = document.getElementById('error-message');
-        const videoElement = document.getElementById('video');
-
-        // Initialize Shaka Player for M3U8 and MPD
-        function initializeShakaPlayer() {
-            logMessage('Attempting playback with Shaka Player...');
-            const player = new shaka.Player(videoElement);
-
-            if (streamUrl.includes('.mpd')) {
-                logMessage('Loading MPD stream...');
-                player.load(streamUrl).then(() => {
-                    logMessage('Playback started with MPD stream');
-                }).catch((error) => {
-                    logMessage('Error with MPD stream: ' + error);
-                    errorMessage.innerText = 'Error: Unable to load MPD stream.';
-                });
-            } else if (streamUrl.includes('.m3u8')) {
-                logMessage('Loading M3U8 stream...');
-                // Attempt to load M3U8 stream using Shaka Player's HLS support
-                const hlsConfig = {
-                    // Configuration options (if needed)
-                };
-                player.configure(hlsConfig);
-                player.load(streamUrl).then(() => {
-                    logMessage('Playback started with M3U8 stream');
-                }).catch((error) => {
-                    logMessage('Error with M3U8 stream: ' + error);
-                    errorMessage.innerText = 'Error: Unable to load M3U8 stream.';
-                });
-            } else {
-                // Fallback to TS stream handling
-                logMessage('Attempting TS stream playback...');
-                handleTSStream();
+        const player = videojs('my-video', {
+            techOrder: ['html5'],
+            html5: {
+                hls: {
+                    withCredentials: true
+                }
             }
-        }
+        });
 
-        // Handle TS stream using Media Source Extensions (MSE)
-        function handleTSStream() {
-            const tsPlayer = document.createElement('video');
-            tsPlayer.controls = true;
-            tsPlayer.autoplay = true;
+        player.ready(function() {
+            // Log that the player is ready
+            console.log('Video.js Player is ready!');
 
-            // Set up MSE
-            const mediaSource = new MediaSource();
-            tsPlayer.src = URL.createObjectURL(mediaSource);
-            
-            mediaSource.addEventListener('sourceopen', () => {
-                const sourceBuffer = mediaSource.addSourceBuffer('video/mp2t'); // TS MIME type
-                
-                fetch(streamUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.arrayBuffer();
-                    })
-                    .then(data => {
-                        sourceBuffer.appendBuffer(data);
-                    })
-                    .catch((error) => {
-                        logMessage('Error loading TS stream data: ' + error);
-                        errorMessage.innerText = 'Error: Unable to load TS stream.';
-                    });
+            // Load the stream URL based on the type
+            if (streamUrl.includes('.m3u8')) {
+                player.src({ type: 'application/x-mpegURL', src: streamUrl });
+            } else if (streamUrl.includes('.mpd')) {
+                player.src({ type: 'application/dash+xml', src: streamUrl });
+            } else if (streamUrl.includes('.ts')) {
+                player.src({ type: 'video/mp2t', src: streamUrl });
+            } else {
+                document.getElementById('error-message').innerText = 'Unsupported stream type!';
+            }
+
+            // Handle any error during playback
+            player.on('error', function() {
+                document.getElementById('error-message').innerText = 'Error: Unable to load the stream.';
+                console.error('Error loading the stream:', player.error());
             });
-
-            videoElement.innerHTML = ''; // Clear existing content
-            videoElement.appendChild(tsPlayer);
-        }
-
-        // Initialize the Shaka Player for MPD/M3U8 or TS playback
-        initializeShakaPlayer();
+        });
     </script>
 </body>
 </html>
