@@ -65,6 +65,19 @@
         let videoElement = document.getElementById('video');
         let player;
 
+        function initializeTsPlayer() {
+            logMessage('Attempting playback with TS player...');
+            videoElement.src = streamUrl;
+            videoElement.addEventListener('canplay', () => {
+                videoElement.play();
+                logMessage('TS player loaded successfully.');
+            });
+            videoElement.addEventListener('error', () => {
+                logMessage('TS player failed. Switching to Video.js.');
+                initializeVideoJS();
+            });
+        }
+
         function initializeVideoJS() {
             logMessage('Attempting playback with Video.js...');
             player = videojs(videoElement);
@@ -75,26 +88,12 @@
             player.play();
 
             player.on('error', () => {
-                logMessage('Video.js failed. Switching to TS player.');
-                player.dispose();
-                initializeTsPlayer();
+                errorMessage.innerText = 'Error: Both TS player and Video.js failed to load the video stream.';
+                logMessage('Video.js also failed to load the stream.');
             });
         }
 
-        function initializeTsPlayer() {
-            logMessage('Attempting playback with TS player...');
-            videoElement.src = streamUrl;
-            videoElement.addEventListener('canplay', () => {
-                videoElement.play();
-                logMessage('TS player loaded successfully.');
-            });
-            videoElement.addEventListener('error', () => {
-                errorMessage.innerText = 'Error: Failed to load the video stream.';
-                logMessage('TS player also failed to load the stream.');
-            });
-        }
-
-        initializeVideoJS();
+        initializeTsPlayer();
     </script>
 </body>
 </html>
