@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Player</title>
-    <link rel="stylesheet" href="https://vjs.zencdn.net/7.18.1/video-js.css">
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -26,54 +26,60 @@
             color: red;
             margin-top: 20px;
         }
+        #debug-log {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        #debug-log p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="my-video" class="video-js vjs-default-skin" controls></video>
+        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@2.0.0/dist/videojs-contrib-hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-dash@2.10.0/dist/videojs-contrib-dash.min.js"></script>
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
         document.getElementById('channel-name').innerText = channelName;
 
-        const player = videojs('my-video', {
-            techOrder: ['html5'],
-            html5: {
-                hls: {
-                    withCredentials: true
-                }
-            }
-        });
+        const logMessage = (message) => {
+            const logContainer = document.getElementById('debug-log');
+            const logEntry = document.createElement('p');
+            logEntry.innerText = message;
+            logContainer.appendChild(logEntry);
+        };
 
-        player.ready(function() {
-            // Log that the player is ready
-            console.log('Video.js Player is ready!');
+        const errorMessage = document.getElementById('error-message');
 
-            // Load the stream URL based on the type
-            if (streamUrl.includes('.m3u8')) {
-                player.src({ type: 'application/x-mpegURL', src: streamUrl });
-            } else if (streamUrl.includes('.mpd')) {
-                player.src({ type: 'application/dash+xml', src: streamUrl });
-            } else if (streamUrl.includes('.ts')) {
-                player.src({ type: 'video/mp2t', src: streamUrl });
-            } else {
-                document.getElementById('error-message').innerText = 'Unsupported stream type!';
-            }
+        let videoElement = document.getElementById('video');
 
-            // Handle any error during playback
-            player.on('error', function() {
-                document.getElementById('error-message').innerText = 'Error: Unable to load the stream.';
-                console.error('Error loading the stream:', player.error());
+        function initializeVideoJS() {
+            logMessage('Attempting playback with Video.js...');
+            const player = videojs(videoElement);
+            player.src({
+                src: streamUrl,
+                type: streamUrl.includes(".mpd") ? "application/dash+xml" : "application/x-mpegURL"
             });
-        });
+            player.play();
+
+            player.on('error', () => {
+                logMessage('Video.js encountered an error while trying to play the stream.');
+                errorMessage.innerText = 'Error: Unable to load the video stream with Video.js.';
+            });
+        }
+
+        initializeVideoJS();
     </script>
 </body>
 </html>
