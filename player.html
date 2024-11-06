@@ -19,10 +19,6 @@
             text-align: center;
             padding: 20px;
         }
-        .error-message {
-            color: red;
-            margin-top: 20px;
-        }
         #debug-log {
             background-color: #333;
             padding: 10px;
@@ -38,8 +34,8 @@
 <body>
     <div id="videoContainer">
         <h1 id="channel-name">Stream Player</h1>
-        <!-- DPlayer instance -->
-        <div id="dplayer" style="display: none;"></div>
+        <!-- Flowplayer container -->
+        <div id="flowplayer" style="display: none;"></div>
         
         <!-- Video.js player as fallback -->
         <video id="video-js-player" class="video-js vjs-default-skin" controls style="width: 100%; display: none;">
@@ -51,10 +47,8 @@
         </div>
     </div>
 
-    <!-- DPlayer library -->
-    <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
-    <!-- flv.js library (for DPlayer to handle .ts) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.5.0/flv.min.js"></script>
+    <!-- Flowplayer library -->
+    <script src="https://releases.flowplayer.org/7.2.7/flowplayer.min.js"></script>
     <!-- Video.js library -->
     <script src="https://vjs.zencdn.net/7.17.0/video.min.js"></script>
 
@@ -63,7 +57,7 @@
         const m3u8Url = 'https://path-to-your-fallback.m3u8'; // Fallback .m3u8 URL
         const mpdUrl = 'https://path-to-your-fallback.mpd'; // Fallback .mpd URL
 
-        const dplayerContainer = document.getElementById('dplayer');
+        const flowplayerContainer = document.getElementById('flowplayer');
         const videoJsPlayer = document.getElementById('video-js-player');
         const debugOutput = document.getElementById('debug-output');
 
@@ -73,57 +67,61 @@
             debugOutput.appendChild(p);
         }
 
-        // Attempt to play using DPlayer for .ts files
-        try {
-            const dp = new DPlayer({
-                container: dplayerContainer,
-                video: {
-                    url: tsUrl,
-                    type: 'customFlv', // Specify for ts files in flv.js format
-                    customType: {
-                        customFlv: function (video, player) {
-                            if (flvjs.isSupported()) {
-                                const flvPlayer = flvjs.createPlayer({
-                                    type: 'flv',
-                                    url: tsUrl,
-                                });
-                                flvPlayer.attachMediaElement(video);
-                                flvPlayer.load();
-                                flvPlayer.play().then(() => {
-                                    logDebug('DPlayer successfully loaded the .ts stream with flv.js.');
-                                    dplayerContainer.style.display = 'block';
-                                }).catch(error => {
-                                    logDebug('DPlayer failed to play .ts stream. Switching to Video.js fallback.');
-                                    switchToVideoJs();
-                                });
-                            } else {
-                                logDebug('flv.js not supported. Switching to Video.js fallback.');
-                                switchToVideoJs();
-                            }
-                        }
-                    }
+        // Attempt to play using Flowplayer for .ts files
+        function tryFlowplayer() {
+            logDebug('Attempting playback with Flowplayer...');
+            flowplayerContainer.style.display = 'block';
+            flowplayerContainer.innerHTML = `<video id="flowplayer-video" controls></video>`;
+            const videoElement = document.getElementById("flowplayer-video");
+
+            flowplayer(videoElement, {
+                clip: {
+                    sources: [
+                        { type: "video/MP2T", src: tsUrl }
+                    ]
                 }
             });
-        } catch (error) {
-            logDebug('DPlayer initialization failed. Attempting Video.js fallback.');
-            switchToVideoJs();
+
+            videoElement.onplay = function () {
+                logDebug('Flowplayer is playing the .ts stream.');
+            };
+
+            videoElement.onerror = function () {
+                logDebug('Flowplayer failed to play .ts stream. Switching to Video.js fallback.');
+                flowplayerContainer.style.display = 'none';
+                tryVideoJs();
+            };
         }
 
-        // Function to switch to Video.js player
-        function switchToVideoJs() {
-            dplayerContainer.style.display = 'none';
+        // Attempt to play using Video.js for m3u8
+        function tryVideoJs() {
+            logDebug('Attempting playback with Video.js for .m3u8...');
             videoJsPlayer.style.display = 'block';
-
             const videoJs = videojs(videoJsPlayer);
             videoJs.src({ src: m3u8Url, type: 'application/x-mpegURL' });
-            videoJs.play().catch(error => {
-                logDebug('Video.js failed to autoplay with .m3u8 format.');
-                videoJs.src({ src: mpdUrl, type: 'application/dash+xml' });
-                videoJs.play().catch(() => {
-                    logDebug('Video.js failed to play with both .m3u8 and .mpd formats.');
-                });
+
+            videoJs.play().then(() => {
+                logDebug('Video.js is playing the .m3u8 stream.');
+            }).catch(error => {
+                logDebug('Video.js failed to play with .m3u8 format. Attempting .mpd format.');
+                tryVideoJsMpd();
             });
         }
+
+        // Attempt to play using Video.js for mpd
+        function tryVideoJsMpd() {
+            const videoJs = videojs(videoJsPlayer);
+            videoJs.src({ src: mpdUrl, type: 'application/dash+xml' });
+
+            videoJs.play().then(() => {
+                logDebug('Video.js is playing the .mpd stream.');
+            }).catch(error => {
+                logDebug('Video.js failed to play with both .m3u8 and .mpd formats.');
+            });
+        }
+
+        // Start the playback attempts
+        tryFlowplayer();
     </script>
 </body>
 </html>
