@@ -74,7 +74,8 @@ function displayChannels(channels) {
 
 // Function to navigate to player.html with URL parameters for streaming
 function playStream(url, name) {
-    // Redirect to the proxy page, which will bypass CORS
-    const proxyUrl = `proxy.html?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
-    window.location.href = proxyUrl;
+    // Use the proxy to fetch the stream with CORS headers
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+    const playerUrl = `player.html?url=${encodeURIComponent(proxyUrl)}&name=${encodeURIComponent(name)}`;
+    window.location.href = playerUrl;
 }
