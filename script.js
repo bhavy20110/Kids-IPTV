@@ -13,7 +13,7 @@ fetch('M3UPlus-Playlist-20241019222427.m3u')
     })
     .catch(error => {
         console.error('Error fetching M3U file:', error);
-        document.getElementById('channel-list').innerHTML = `<p class="error-message">Failed to load channels: ${error.message}</p>`;
+        document.getElementById('channel-list').innerHTML = <p class="error-message">Failed to load channels: ${error.message}</p>;
     });
 
 // Function to parse the M3U file and extract channel information
@@ -63,10 +63,10 @@ function displayChannels(channels) {
             console.log('Displaying channel:', channel); // Debug each channel
             const channelDiv = document.createElement('div');
             channelDiv.classList.add('channel');
-            channelDiv.innerHTML = `
+            channelDiv.innerHTML = 
                 <img src="${channel.logo || 'path/to/default_logo.png'}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
                 <p>${channel.name}</p>
-            `;
+            ;
             container.appendChild(channelDiv);
         });
     }
@@ -74,8 +74,7 @@ function displayChannels(channels) {
 
 // Function to navigate to player.html with URL parameters for streaming
 function playStream(url, name) {
-    // Use the proxy to fetch the stream with CORS headers
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-    const playerUrl = `player.html?url=${encodeURIComponent(proxyUrl)}&name=${encodeURIComponent(name)}`;
-    window.location.href = playerUrl;
+    // Redirect to the proxy page, which will bypass CORS
+    const proxyUrl = proxy.html?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)};
+    window.location.href = proxyUrl;
 }
