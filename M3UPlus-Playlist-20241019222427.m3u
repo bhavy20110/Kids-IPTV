@@ -1,12 +1,12 @@
 #EXTM3U url-tvg=""
 #EXTINF:-1 tvg-id="Disney India SD" tvg-name="Disney India SD" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD
-https://tgaadi-web.tech/portal/sg-iptv.php?watch=93229
+http://119.156.26.155:8000/play/a05y/index.m3u8
 #EXTINF:-1 tvg-id="Disney India SD (TATAPLAY-MULTIAUDIO) 2 " tvg-name="Disney India SD 2" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 2
 http://game.denver1769.in/port/tp3.php?id=11639
 #EXTINF:-1 tvg-id="Disney India SD 3" tvg-name="Disney India SD 3" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 3
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=167551%7CReferer=RANAPK
 #EXTINF:-1 tvg-id="Hungama Kids 1" tvg-name="Hungama Kids 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 1
-http://tgaadi-web.tech/portal/sg-iptv.php?watch=92287
+http://119.156.26.155:8000/play/a05t/index.m3u8
 #EXTINF:-1 tvg-id="Hungama Kids 2" tvg-name="Hungama Kids 2" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 2
 http://starshare.live:8080/live/7382837374/5003958588/18456.m3u8
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
@@ -28,7 +28,7 @@ https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=150482
 #EXTINF:-1 tvg-id="Nick Junior" tvg-name="Nick Junior" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Nick_Junior.png" group-title="Kids",Nick Junior
 http://119.156.26.155:8000/play/a061/index.m3u8
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Sonic Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/sonic_Hindi.png" group-title="Kids",Sonic Hindi
-http://tgaadi-web.tech/portal/sg-iptv.php?watch=111083
+http://119.156.26.155:8000/play/a05y/index.m3u8
 #EXTINF:-1 tvg-id="POGO" tvg-name="POGO" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/POGO-logo.png/250px-POGO-logo.png" group-title="Kids",POGO
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=150483
 #EXTINF:-1 tvg-id="Zoo Moo" tvg-name="Zoo Moo" tvg-logo="https://cdn.prod.website-files.com/64e961c3862892bff815289d/667534c959673c60d0418dad_logo_ZM_web_crop.webp" group-title="Kids",Zoo Moo
