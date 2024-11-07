@@ -1,0 +1,8 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:10
+#EXT-X-MEDIA-SEQUENCE:0
+
+#EXTINF:10,
+https://file-to-link-bot-nx-a4a8eaae5135.herokuapp.com/dl/672c75bd4325e98f395c5cac
+
