@@ -65,7 +65,8 @@ function displayChannels(channels) {
             channelDiv.classList.add('channel');
             channelDiv.innerHTML = 
                 <img src="${channel.logo || 'path/to/default_logo.png'}" alt="${channel.name}" class="channel-logo" onclick="playStream('${encodeURIComponent(channel.url)}', '${encodeURIComponent(channel.name)}')">
-                <p>${channel.name}</p>;
+                <p>${channel.name}</p>
+            ;
             container.appendChild(channelDiv);
         });
     }
