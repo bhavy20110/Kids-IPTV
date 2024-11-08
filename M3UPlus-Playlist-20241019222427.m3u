@@ -12,13 +12,13 @@ https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=167551%7CReferer=RANAPK
 https://tgaadi-web.tech/stalker/portal.m3u8?id=864
 
 #EXTINF:-1 tvg-id="Hungama Kids 1" tvg-name="Hungama Kids 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 1
-http://119.156.26.155:8000/play/a05t/index.m3u8
+https://tgaadi-web.tech/stalker/portal.m3u8?id=9400
 
 #EXTINF:-1 tvg-id="Hungama Kids 2" tvg-name="Hungama Kids 2" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 2
-http://starshare.live:8080/live/7382837374/5003958588/18456.m3u8
+http://119.156.26.155:8000/play/a05t/index.m3u8
 
 #EXTINF:-1 tvg-id="Hungama Kids 3" tvg-name="Hungama Kids 3" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 3
-http://bostv.one:8080/54846548461/774302/92417
+http://starshare.live:8080/live/7382837374/5003958588/18456.m3u8
 
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=150478
