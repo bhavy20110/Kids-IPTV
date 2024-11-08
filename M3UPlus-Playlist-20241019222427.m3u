@@ -9,6 +9,9 @@ https://game.denver1769.in/port/tp3.php?id=11639
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=167551%7CReferer=RANAPK
 
 #EXTINF:-1 tvg-id="Disney India SD 4" tvg-name="Disney India SD 4" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 4
+http://bostv.one:8080/85750857500/0004312/92416
+
+#EXTINF:-1 tvg-id="Disney India SD 5" tvg-name="Disney India SD 5" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 5
 https://tgaadi-web.tech/stalker/portal.m3u8?id=864
 
 #EXTINF:-1 tvg-id="Hungama Kids 1" tvg-name="Hungama Kids 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 1
@@ -19,6 +22,9 @@ http://119.156.26.155:8000/play/a05t/index.m3u8
 
 #EXTINF:-1 tvg-id="Hungama Kids 3" tvg-name="Hungama Kids 3" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 3
 http://starshare.live:8080/live/7382837374/5003958588/18456.m3u8
+
+#EXTINF:-1 tvg-id="Hungama Kids 4" tvg-name="Hungama Kids 4" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 4
+http://bostv.one:8080/85750857500/0004312/92417
 
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=150478
@@ -36,7 +42,7 @@ https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=26187
 https://pubads.g.doubleclick.net/ssai/event/40H5HfwWTZadFGYkBTqagg/master.m3u8
 
 #EXTINF:-1 tvg-id="sonyyay.com/" tvg-name="Sony Yay 3" tvg-logo="https://sonypicturesnetworks.com/images/logos/SONY%20YAY.png" group-title="Kids",Sony Yay 3
-http://bostv.one:8080/54846548461/774302/92420
+http://bostv.one:8080/85750857500/0004312/92420
 
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/en/7/74/Super_Hungama_Logo.png?20220302022636" group-title="Kids", SUPER HUNGAMA
 https://unknown-playlists.vercel.app/super-hungama.m3u8
