@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 800px; /* Reduced width for a more compact layout */
     margin: 0 auto;
     padding: 20px;
     text-align: center;
@@ -22,7 +22,7 @@ h1 {
 #channel-list {
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 4 columns for a 4x4 grid */
-    gap: 15px;
+    gap: 10px; /* Smaller gap between items */
 }
 
 .channel {
@@ -32,8 +32,8 @@ h1 {
     justify-content: center;
     background: #282828;
     border: 1px solid #444;
-    border-radius: 8px;
-    padding: 10px;
+    border-radius: 6px;
+    padding: 8px;
     width: 100%;
     aspect-ratio: 1; /* Maintain square shape */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -47,16 +47,16 @@ h1 {
 }
 
 .channel-logo {
-    width: 80%;
-    max-height: 60%;
+    width: 70%; /* Reduced size for more compact layout */
+    max-height: 50%;
     object-fit: contain;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     transition: opacity 0.2s;
 }
 
 .channel p {
     margin: 0;
-    font-size: 14px;
+    font-size: 12px; /* Smaller font size */
     font-weight: bold;
     color: #f4f4f4;
     text-align: center;
