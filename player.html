@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playing Channel...</title>
-    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -52,7 +51,7 @@
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
         <div style="position: relative;">
-            <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+            <video id="video" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
             <div class="audio-selector" id="audio-selector" style="display: none;">
                 <select id="audioTrackSelector"></select>
             </div>
@@ -61,7 +60,6 @@
         <div class="error-message" id="error-message"></div>
     </div>
 
-    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -80,16 +78,7 @@
 
         let videoElement = document.getElementById('video');
         
-        // Initialize Video.js player with HLS.js
-        const player = videojs(videoElement, {
-            techOrder: ['hls'],
-            autoplay: true,
-            controls: true,
-            preload: 'auto',
-            fluid: true,
-        });
-
-        // Add HLS.js for custom streams
+        // Initialize HLS.js for custom streams
         if (Hls.isSupported()) {
             const hls = new Hls({
                 startLevel: -1, // Auto-detect level
@@ -103,7 +92,6 @@
                 }
             });
 
-            // Attach event listeners for error handling
             hls.on(Hls.Events.ERROR, function(event, data) {
                 logMessage('HLS.js encountered an error: ' + data.type);
                 if (data.fatal) {
@@ -124,7 +112,6 @@
 
             hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
                 logMessage('HLS.js is parsing the manifest...');
-                // Enable audio track switching
                 if (data.audioTracks && data.audioTracks.length > 1) {
                     logMessage('Multiple audio tracks found.');
                     const audioTrackSelector = document.getElementById('audioTrackSelector');
@@ -135,7 +122,6 @@
                         audioTrackSelector.appendChild(option);
                     });
 
-                    // Show the audio track selector
                     document.getElementById('audio-selector').style.display = 'block';
 
                     audioTrackSelector.addEventListener('change', function() {
@@ -146,35 +132,33 @@
                 }
             });
 
-            // CORS Proxy URL
+            // Check if the URL requires CORS Proxy
             const corsProxyUrl = "https://cors-anywhere.herokuapp.com/";
 
-            // Function to check if CORS is enabled
             const checkCors = (url) => {
                 return fetch(url, {
-                    method: 'HEAD', 
+                    method: 'HEAD',
                     mode: 'cors',
                     headers: {
                         'Origin': window.location.origin,
                     },
                 }).then(response => response.ok)
-                .catch(error => false);
+                .catch(() => false);
             };
 
-            // First, try loading the stream without the CORS proxy
+            // Try loading the stream without CORS first
             checkCors(streamUrl).then(isCorsEnabled => {
                 if (isCorsEnabled) {
                     logMessage('CORS is enabled, loading stream...');
                     hls.loadSource(streamUrl);
-                    player.src({ src: streamUrl, type: 'application/x-mpegURL' });
+                    videoElement.src = streamUrl;
                 } else {
                     logMessage('CORS is not enabled, using the CORS proxy...');
                     hls.loadSource(corsProxyUrl + streamUrl);
-                    player.src({ src: corsProxyUrl + streamUrl, type: 'application/x-mpegURL' });
+                    videoElement.src = corsProxyUrl + streamUrl;
                 }
             });
 
-            // Bind the HLS.js instance to the player
             hls.attachMedia(videoElement);
         } else {
             errorMessage.innerText = 'HLS.js is not supported in this browser.';
