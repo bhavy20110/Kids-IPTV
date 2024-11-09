@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Audio Stream Player</title>
+    <title>Playing Channel...</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
@@ -160,7 +160,7 @@
                 }).then(response => response.ok)
                 .catch(error => false);
             };
-            
+
             // First, try loading the stream without the CORS proxy
             checkCors(streamUrl).then(isCorsEnabled => {
                 if (isCorsEnabled) {
