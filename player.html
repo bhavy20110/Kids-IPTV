@@ -46,10 +46,10 @@
             border-radius: 5px;
             font-size: 14px;
         }
-        #playerSelectBtn {
+        #playerSelectDropdown {
             background-color: #555;
             color: white;
-            padding: 10px 20px;
+            padding: 10px;
             border: none;
             cursor: pointer;
             border-radius: 5px;
@@ -69,7 +69,10 @@
                 <select id="audioTrackSelector"></select>
             </div>
         </div>
-        <button id="playerSelectBtn">Switch Player</button>
+        <select id="playerSelectDropdown">
+            <option value="videojs">Video.js</option>
+            <option value="hlsjs">HLS.js</option>
+        </select>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
@@ -153,10 +156,10 @@
                 });
         };
 
-        document.getElementById('playerSelectBtn').onclick = () => {
-            const useHls = !player || player.tech_.name_ !== 'Html5';
+        document.getElementById('playerSelectDropdown').addEventListener('change', (e) => {
+            const useHls = e.target.value === 'hlsjs';
             initPlayer(useHls);
-        };
+        });
 
         checkCorsAndInitPlayer();
     </script>
