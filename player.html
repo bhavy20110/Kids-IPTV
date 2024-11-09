@@ -81,13 +81,13 @@
         // Initialize HLS.js for custom streams
         if (Hls.isSupported()) {
             const hls = new Hls({
-                startLevel: -1, // Auto-detect level
-                capLevelToPlayerSize: true, // Ensure proper scaling
-                maxMaxBufferLength: 30, // Prevents buffering delays
+                startLevel: 0, // Start from the first level instead of auto-detect
+                capLevelToPlayerSize: true,
+                maxMaxBufferLength: 30,
+                debug: true, // Enable debugging to view logs and errors
                 xhrSetup: function(xhr, url) {
-                    // Modify the request to handle CORS and chunk URLs properly
                     if (url.includes('.ts')) {
-                        xhr.setRequestHeader('Origin', window.location.origin); // Set correct origin for chunks
+                        xhr.setRequestHeader('Origin', window.location.origin);
                     }
                 }
             });
