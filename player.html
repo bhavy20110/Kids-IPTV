@@ -36,12 +36,27 @@
         #debug-log p {
             margin: 5px 0;
         }
+        .audio-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
-        <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+        <div style="position: relative;">
+            <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+            <div class="audio-selector" id="audio-selector" style="display: none;">
+                <select id="audioTrackSelector"></select>
+            </div>
+        </div>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
     </div>
@@ -106,12 +121,7 @@
                 // Enable audio track switching
                 if (data.audioTracks && data.audioTracks.length > 1) {
                     logMessage('Multiple audio tracks found.');
-                    const audioTrackSelector = document.createElement('select');
-                    audioTrackSelector.style.marginTop = '10px';
-                    audioTrackSelector.style.backgroundColor = '#333';
-                    audioTrackSelector.style.color = 'white';
-                    audioTrackSelector.style.fontSize = '14px';
-
+                    const audioTrackSelector = document.getElementById('audioTrackSelector');
                     data.audioTracks.forEach((track, index) => {
                         const option = document.createElement('option');
                         option.value = index;
@@ -119,13 +129,14 @@
                         audioTrackSelector.appendChild(option);
                     });
 
+                    // Show the audio track selector
+                    document.getElementById('audio-selector').style.display = 'block';
+
                     audioTrackSelector.addEventListener('change', function() {
                         const trackIndex = audioTrackSelector.value;
                         hls.audioTrack = trackIndex;
                         logMessage('Switched to audio track: ' + trackIndex);
                     });
-
-                    document.getElementById('videoContainer').appendChild(audioTrackSelector);
                 }
             });
 
