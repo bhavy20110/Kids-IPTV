@@ -64,53 +64,53 @@
         const errorMessage = document.getElementById('error-message');
 
         let videoElement = document.getElementById('video');
+        
+        // Initialize Video.js player
+        const player = videojs(videoElement, {
+            techOrder: ['html5', 'hls'],
+            autoplay: true,
+            controls: true,
+            preload: 'auto',
+        });
 
-        function initializeHLS() {
-            logMessage('Attempting to play with HLS.js...');
-            if (Hls.isSupported()) {
-                const hls = new Hls();
+        // Add HLS.js for custom streams
+        if (Hls.isSupported()) {
+            const hls = new Hls();
 
-                // Attach event listeners for error handling
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    logMessage('HLS.js encountered an error: ' + data.type);
-                    if (data.fatal) {
-                        if (data.fatal === 'networkError') {
-                            errorMessage.innerText = 'Network Error: Unable to fetch the stream.';
-                            console.error('Network error:', data);
-                        } else if (data.fatal === 'mediaError') {
-                            errorMessage.innerText = 'Media Error: Unable to decode the media.';
-                            console.error('Media error:', data);
-                        } else if (data.fatal === 'otherError') {
-                            errorMessage.innerText = 'Unknown Error: Something went wrong.';
-                            console.error('Unknown error:', data);
-                        } else {
-                            errorMessage.innerText = 'Error: Unable to load HLS stream.';
-                        }
+            // Attach event listeners for error handling
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                logMessage('HLS.js encountered an error: ' + data.type);
+                if (data.fatal) {
+                    if (data.fatal === 'networkError') {
+                        errorMessage.innerText = 'Network Error: Unable to fetch the stream.';
+                        console.error('Network error:', data);
+                    } else if (data.fatal === 'mediaError') {
+                        errorMessage.innerText = 'Media Error: Unable to decode the media.';
+                        console.error('Media error:', data);
+                    } else if (data.fatal === 'otherError') {
+                        errorMessage.innerText = 'Unknown Error: Something went wrong.';
+                        console.error('Unknown error:', data);
+                    } else {
+                        errorMessage.innerText = 'Error: Unable to load HLS stream.';
                     }
-                });
+                }
+            });
 
-                hls.loadSource(streamUrl);
-                hls.attachMedia(videoElement);
-
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    logMessage('HLS.js is parsing the manifest...');
-                });
-                hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
-                    logMessage('Switched to level ' + data.level);
-                });
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    logMessage('HLS.js encountered an error: ' + data.type);
-                    errorMessage.innerText = 'Error: Unable to load HLS stream.';
-                });
-            } else {
-                logMessage('HLS.js is not supported in this browser.');
-                errorMessage.innerText = 'Error: HLS.js is not supported.';
-            }
+            hls.loadSource(streamUrl);
+            hls.attachMedia(player.tech().el()); // Attach to Video.js player
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                logMessage('HLS.js is parsing the manifest...');
+            });
+            hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
+                logMessage('Switched to level ' + data.level);
+            });
+        } else {
+            logMessage('HLS.js is not supported in this browser.');
+            errorMessage.innerText = 'Error: HLS.js is not supported.';
         }
 
-        if (streamUrl) {
-            initializeHLS();
-        } else {
+        // If the URL is invalid, show an error
+        if (!streamUrl) {
             errorMessage.innerText = 'Error: Invalid stream URL.';
         }
     </script>
