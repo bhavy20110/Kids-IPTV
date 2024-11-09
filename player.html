@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playing Channel...</title>
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
             background-color: #121212;
@@ -51,7 +52,7 @@
     <div id="videoContainer">
         <h1 id="channel-name"></h1>
         <div style="position: relative;">
-            <video id="video" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
+            <video id="video" class="video-js vjs-default-skin" controls crossorigin="anonymous" playsinline style="width: 100%;"></video>
             <div class="audio-selector" id="audio-selector" style="display: none;">
                 <select id="audioTrackSelector"></select>
             </div>
@@ -60,13 +61,14 @@
         <div class="error-message" id="error-message"></div>
     </div>
 
+    <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
         const channelName = decodeURIComponent(params.get('name'));
         document.getElementById('channel-name').innerText = channelName;
-        
+
         const logMessage = (message) => {
             const logContainer = document.getElementById('debug-log');
             const logEntry = document.createElement('p');
@@ -78,20 +80,30 @@
 
         let videoElement = document.getElementById('video');
         
-        // Initialize HLS.js for custom streams
+        // Initialize Video.js player
+        const player = videojs(videoElement, {
+            techOrder: ['html5', 'hls'],
+            autoplay: true,
+            controls: true,
+            preload: 'auto',
+            fluid: true,
+        });
+
+        // Add HLS.js for custom streams
         if (Hls.isSupported()) {
             const hls = new Hls({
-                startLevel: 0, // Start from the first level instead of auto-detect
-                capLevelToPlayerSize: true,
-                maxMaxBufferLength: 30,
-                debug: true, // Enable debugging to view logs and errors
+                startLevel: -1, // Auto-detect level
+                capLevelToPlayerSize: true, // Ensure proper scaling
+                maxMaxBufferLength: 30, // Prevents buffering delays
                 xhrSetup: function(xhr, url) {
+                    // Modify the request to handle CORS and chunk URLs properly
                     if (url.includes('.ts')) {
-                        xhr.setRequestHeader('Origin', window.location.origin);
+                        xhr.setRequestHeader('Origin', window.location.origin); // Set correct origin for chunks
                     }
                 }
             });
 
+            // Attach event listeners for error handling
             hls.on(Hls.Events.ERROR, function(event, data) {
                 logMessage('HLS.js encountered an error: ' + data.type);
                 if (data.fatal) {
@@ -112,6 +124,7 @@
 
             hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
                 logMessage('HLS.js is parsing the manifest...');
+                // Enable audio track switching
                 if (data.audioTracks && data.audioTracks.length > 1) {
                     logMessage('Multiple audio tracks found.');
                     const audioTrackSelector = document.getElementById('audioTrackSelector');
@@ -122,6 +135,7 @@
                         audioTrackSelector.appendChild(option);
                     });
 
+                    // Show the audio track selector
                     document.getElementById('audio-selector').style.display = 'block';
 
                     audioTrackSelector.addEventListener('change', function() {
@@ -132,33 +146,35 @@
                 }
             });
 
-            // Check if the URL requires CORS Proxy
+            // CORS Proxy URL
             const corsProxyUrl = "https://cors-anywhere.herokuapp.com/";
 
+            // Function to check if CORS is enabled
             const checkCors = (url) => {
                 return fetch(url, {
-                    method: 'HEAD',
+                    method: 'HEAD', 
                     mode: 'cors',
                     headers: {
                         'Origin': window.location.origin,
                     },
                 }).then(response => response.ok)
-                .catch(() => false);
+                .catch(error => false);
             };
 
-            // Try loading the stream without CORS first
+            // First, try loading the stream without the CORS proxy
             checkCors(streamUrl).then(isCorsEnabled => {
                 if (isCorsEnabled) {
                     logMessage('CORS is enabled, loading stream...');
                     hls.loadSource(streamUrl);
-                    videoElement.src = streamUrl;
+                    player.src({ src: streamUrl, type: 'application/x-mpegURL' });
                 } else {
                     logMessage('CORS is not enabled, using the CORS proxy...');
                     hls.loadSource(corsProxyUrl + streamUrl);
-                    videoElement.src = corsProxyUrl + streamUrl;
+                    player.src({ src: corsProxyUrl + streamUrl, type: 'application/x-mpegURL' });
                 }
             });
 
+            // Bind the HLS.js instance to the player
             hls.attachMedia(videoElement);
         } else {
             errorMessage.innerText = 'HLS.js is not supported in this browser.';
