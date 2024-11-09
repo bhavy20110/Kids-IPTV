@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Player</title>
+    <title>Multi-Audio Stream Player</title>
     <link rel="stylesheet" href="https://vjs.zencdn.net/7.21.1/video-js.css">
     <style>
         body {
@@ -71,11 +71,16 @@
             autoplay: true,
             controls: true,
             preload: 'auto',
+            fluid: true,
         });
 
         // Add HLS.js for custom streams
         if (Hls.isSupported()) {
-            const hls = new Hls();
+            const hls = new Hls({
+                startLevel: -1, // Auto-detect level
+                capLevelToPlayerSize: true, // Ensure proper scaling
+                maxMaxBufferLength: 30, // Prevents buffering delays
+            });
 
             // Attach event listeners for error handling
             hls.on(Hls.Events.ERROR, function(event, data) {
@@ -96,7 +101,39 @@
                 }
             });
 
-            hls.loadSource(streamUrl);
+            hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+                logMessage('HLS.js is parsing the manifest...');
+                // Enable audio track switching
+                if (data.audioTracks && data.audioTracks.length > 1) {
+                    logMessage('Multiple audio tracks found.');
+                    const audioTrackSelector = document.createElement('select');
+                    audioTrackSelector.style.marginTop = '10px';
+                    audioTrackSelector.style.backgroundColor = '#333';
+                    audioTrackSelector.style.color = 'white';
+                    audioTrackSelector.style.fontSize = '14px';
+
+                    data.audioTracks.forEach((track, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.innerText = track.name || `Audio Track ${index + 1}`;
+                        audioTrackSelector.appendChild(option);
+                    });
+
+                    audioTrackSelector.addEventListener('change', function() {
+                        const trackIndex = audioTrackSelector.value;
+                        hls.audioTrack = trackIndex;
+                        logMessage('Switched to audio track: ' + trackIndex);
+                    });
+
+                    document.getElementById('videoContainer').appendChild(audioTrackSelector);
+                }
+            });
+
+            // Use a CORS Proxy to handle streams that don't support CORS
+            const corsProxyUrl = "https://cors-anywhere.herokuapp.com/";
+            const proxiedStreamUrl = corsProxyUrl + streamUrl;
+
+            hls.loadSource(proxiedStreamUrl);
             hls.attachMedia(player.tech().el()); // Attach to Video.js player
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 logMessage('HLS.js is parsing the manifest...');
