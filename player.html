@@ -53,8 +53,6 @@
         const channelName = decodeURIComponent(params.get('name'));
         document.getElementById('channel-name').innerText = channelName;
 
-        const proxyUrl = `/api/proxy?url=${encodeURIComponent(streamUrl)}`;
-
         const logMessage = (message) => {
             const logContainer = document.getElementById('debug-log');
             const logEntry = document.createElement('p');
@@ -63,13 +61,14 @@
         };
 
         const errorMessage = document.getElementById('error-message');
-        const videoElement = document.getElementById('video');
+
+        let videoElement = document.getElementById('video');
 
         function initializeVideoJS() {
             logMessage('Attempting playback with Video.js...');
             const player = videojs(videoElement);
             player.src({
-                src: proxyUrl,
+                src: streamUrl,
                 type: streamUrl.includes(".mpd") ? "application/dash+xml" : "application/x-mpegURL"
             });
             player.play();
