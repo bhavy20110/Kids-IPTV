@@ -84,7 +84,7 @@
 
         const errorMessage = document.getElementById('error-message');
 
-        // Initialize JW Player
+        // Initialize JW Player with DRM support (free version)
         jwplayer("jwplayerDiv").setup({
             file: streamUrl,
             type: "mp4", // Set to appropriate type if necessary (e.g., "hls" or "dash")
@@ -120,6 +120,15 @@
             skin: {
                 active: '#FFFFFF',
                 inactive: '#FF0000'
+            },
+            // Enable DRM (free version)
+            drm: {
+                widevine: {
+                    licenseUrl: 'https://your-license-server.com/license' // Replace with actual license server URL
+                },
+                playready: {
+                    licenseUrl: 'https://your-license-server.com/license' // Replace with actual license server URL
+                }
             }
         });
 
