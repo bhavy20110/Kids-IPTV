@@ -14,6 +14,9 @@ http://bostv.one:8080/85750857500/0004312/92416
 #EXTINF:-1 tvg-id="Disney India SD 5" tvg-name="Disney India SD 5" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 5
 https://tgaadi-web.tech/stalker/portal.m3u8?id=864
 
+#EXTINF:-1 tvg-id="Disney India SD 6" tvg-name="Disney India SD 6" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 6
+https://bd.spidy.online/MACX/STREAM4K/play.m3u8?id=475134
+
 #EXTINF:-1 tvg-id="Hungama Kids 1" tvg-name="Hungama Kids 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 1
 https://tgaadi-web.tech/stalker/portal.m3u8?id=9400
 
