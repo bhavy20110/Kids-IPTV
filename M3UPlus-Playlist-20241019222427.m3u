@@ -42,6 +42,9 @@ https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=26187
 https://pubads.g.doubleclick.net/ssai/event/40H5HfwWTZadFGYkBTqagg/master.m3u8
 
 #EXTINF:-1 tvg-id="sonyyay.com/" tvg-name="Sony Yay 3" tvg-logo="https://sonypicturesnetworks.com/images/logos/SONY%20YAY.png" group-title="Kids",Sony Yay 3
+https://unknown-playlists.vercel.app/sonyyay!.m3u8
+
+#EXTINF:-1 tvg-id="sonyyay.com/" tvg-name="Sony Yay 4" tvg-logo="https://sonypicturesnetworks.com/images/logos/SONY%20YAY.png" group-title="Kids",Sony Yay 4
 http://bostv.one:8080/85750857500/0004312/92420
 
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/en/7/74/Super_Hungama_Logo.png?20220302022636" group-title="Kids", SUPER HUNGAMA
