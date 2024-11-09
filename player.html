@@ -69,7 +69,7 @@
             logMessage('Attempting to play with HLS.js...');
             if (Hls.isSupported()) {
                 const hls = new Hls();
-                
+
                 // Attach event listeners for error handling
                 hls.on(Hls.Events.ERROR, function(event, data) {
                     logMessage('HLS.js encountered an error: ' + data.type);
@@ -88,12 +88,15 @@
                         }
                     }
                 });
-                
+
                 hls.loadSource(streamUrl);
                 hls.attachMedia(videoElement);
 
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     logMessage('HLS.js is parsing the manifest...');
+                });
+                hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
+                    logMessage('Switched to level ' + data.level);
                 });
                 hls.on(Hls.Events.ERROR, function(event, data) {
                     logMessage('HLS.js encountered an error: ' + data.type);
