@@ -18,11 +18,11 @@ h1 {
     margin-bottom: 15px;
 }
 
-/* Grid setup for channels */
+/* Grid setup for channels (2x2 layout) */
 #channel-list {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns for a 4x4 grid */
-    gap: 10px; /* Adjusted gap */
+    grid-template-columns: repeat(2, 1fr); /* 2 columns for a 2x2 grid */
+    gap: 20px; /* Adjusted gap */
 }
 
 .channel {
@@ -32,10 +32,10 @@ h1 {
     justify-content: center;
     background: #282828;
     border: 1px solid #444;
-    border-radius: 50%; /* Makes the channel box circular */
+    border-radius: 8px; /* Rounded corners for the boxes */
     padding: 15px;
-    width: 90px; /* Fixed width */
-    height: 90px; /* Fixed height to ensure it's circular */
+    width: 180px; /* Fixed width for the box */
+    height: 180px; /* Fixed height for the box */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
@@ -47,32 +47,25 @@ h1 {
 }
 
 .channel-logo {
-    width: 50px; /* Adjusted to fit inside the circle */
-    height: 50px; /* Fixed height to maintain circle shape */
+    width: 100px; /* Adjusted to fit inside the box */
+    height: 100px; /* Fixed height for logo */
     object-fit: contain;
-    border-radius: 50%; /* Make the image round */
-    margin-bottom: 5px;
-    transition: opacity 0.2s;
+    margin-bottom: 10px;
 }
 
 .channel p {
     margin: 0;
-    font-size: 11px; /* Slightly reduced font size */
+    font-size: 14px; /* Adjusted font size */
     font-weight: bold;
     color: #f4f4f4;
     text-align: center;
     word-wrap: break-word;
-    max-width: 100%;
-}
-
-.channel-logo:hover {
-    opacity: 0.85;
 }
 
 /* Responsive layout for smaller screens */
 @media (max-width: 768px) {
     #channel-list {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
     }
 }
 
