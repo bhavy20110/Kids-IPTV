@@ -95,6 +95,12 @@
                 startLevel: -1, // Auto-detect level
                 capLevelToPlayerSize: true, // Ensure proper scaling
                 maxMaxBufferLength: 30, // Prevents buffering delays
+                xhrSetup: function(xhr, url) {
+                    // Modify the request to handle CORS and chunk URLs properly
+                    if (url.includes('.ts')) {
+                        xhr.setRequestHeader('Origin', window.location.origin); // Set correct origin for chunks
+                    }
+                }
             });
 
             // Attach event listeners for error handling
@@ -158,29 +164,21 @@
             // First, try loading the stream without the CORS proxy
             checkCors(streamUrl).then(isCorsEnabled => {
                 if (isCorsEnabled) {
-                    logMessage('CORS is enabled, using the stream URL directly...');
+                    logMessage('CORS is enabled, loading stream...');
                     hls.loadSource(streamUrl);
+                    player.src({ src: streamUrl, type: 'application/x-mpegURL' });
                 } else {
                     logMessage('CORS is not enabled, using the CORS proxy...');
-                    hls.loadSource(corsProxyUrl + streamUrl); // Use CORS proxy
+                    hls.loadSource(corsProxyUrl + streamUrl);
+                    player.src({ src: corsProxyUrl + streamUrl, type: 'application/x-mpegURL' });
                 }
-                hls.attachMedia(player.tech().el()); // Attach to Video.js player
             });
 
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                logMessage('HLS.js is parsing the manifest...');
-            });
-            hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
-                logMessage('Switched to level ' + data.level);
-            });
+            // Bind the HLS.js instance to the player
+            hls.attachMedia(videoElement);
         } else {
+            errorMessage.innerText = 'HLS.js is not supported in this browser.';
             logMessage('HLS.js is not supported in this browser.');
-            errorMessage.innerText = 'Error: HLS.js is not supported.';
-        }
-
-        // If the URL is invalid, show an error
-        if (!streamUrl) {
-            errorMessage.innerText = 'Error: Invalid stream URL.';
         }
     </script>
 </body>
