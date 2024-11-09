@@ -1,59 +1,82 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #181818; /* Dark background color */
-    color: #f4f4f4; /* Light text color */
+    background-color: #181818;
+    color: #f4f4f4;
     margin: 0;
     padding: 0;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
-    text-align: center; /* Center text */
+    text-align: center;
 }
 
 h1 {
-    color: #ffffff; /* White header color */
-    margin-bottom: 20px; /* Space below the header */
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Grid setup for channels */
+#channel-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns for a 4x4 grid */
+    gap: 15px;
 }
 
 .channel {
-    display: inline-block; /* Allow channel divs to sit side by side */
-    margin: 10px; /* Spacing between channels */
-    cursor: pointer; /* Change cursor on hover */
-    border: 1px solid #444; /* Darker border for channels */
-    border-radius: 8px; /* Rounded corners */
-    background: #282828; /* Dark background for channels */
-    padding: 15px; /* Padding around the content */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Shadow effect */
-    transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition for effects */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #282828;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+    aspect-ratio: 1; /* Maintain square shape */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
 }
 
 .channel:hover {
-    transform: translateY(-3px); /* Lift effect on hover */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7); /* Darker shadow on hover */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
 }
 
 .channel-logo {
-    width: 100px; /* Set a width for the logos */
-    height: auto; /* Maintain aspect ratio */
-    display: block; /* Ensures the logo is a block element */
-    margin-bottom: 10px; /* Space between logo and text */
-    transition: opacity 0.2s; /* Smooth transition for hover effect */
-}
-
-.channel-logo:hover {
-    opacity: 0.8; /* Slight fade effect on hover */
+    width: 80%;
+    max-height: 60%;
+    object-fit: contain;
+    margin-bottom: 10px;
+    transition: opacity 0.2s;
 }
 
 .channel p {
-    margin: 0; /* Remove default margin */
-    font-size: 16px; /* Adjust font size */
-    color: #f4f4f4; /* Light text color for contrast */
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #f4f4f4;
+    text-align: center;
+    word-wrap: break-word;
+    max-width: 100%;
 }
 
-.channel p:hover {
-    color: #1e90ff; /* Change text color on hover */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Add a glow effect on hover */
+.channel-logo:hover {
+    opacity: 0.8;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+    #channel-list {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    #channel-list {
+        grid-template-columns: 1fr; /* Single column on very small screens */
+    }
 }
