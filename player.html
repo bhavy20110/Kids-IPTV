@@ -129,12 +129,33 @@
                 }
             });
 
-            // Use a CORS Proxy to handle streams that don't support CORS
+            // CORS Proxy URL
             const corsProxyUrl = "https://cors-anywhere.herokuapp.com/";
-            const proxiedStreamUrl = corsProxyUrl + streamUrl;
 
-            hls.loadSource(proxiedStreamUrl);
-            hls.attachMedia(player.tech().el()); // Attach to Video.js player
+            // Function to check if CORS is enabled
+            const checkCors = (url) => {
+                return fetch(url, {
+                    method: 'HEAD', 
+                    mode: 'cors',
+                    headers: {
+                        'Origin': window.location.origin,
+                    },
+                }).then(response => response.ok)
+                .catch(error => false);
+            };
+
+            // First, try loading the stream without the CORS proxy
+            checkCors(streamUrl).then(isCorsEnabled => {
+                if (isCorsEnabled) {
+                    logMessage('CORS is enabled, using the stream URL directly...');
+                    hls.loadSource(streamUrl);
+                } else {
+                    logMessage('CORS is not enabled, using the CORS proxy...');
+                    hls.loadSource(corsProxyUrl + streamUrl); // Use CORS proxy
+                }
+                hls.attachMedia(player.tech().el()); // Attach to Video.js player
+            });
+
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 logMessage('HLS.js is parsing the manifest...');
             });
