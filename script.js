@@ -16,7 +16,7 @@ function parseM3U(data) {
     const lines = data.split('\n');
     const channels = [];
     let currentChannel = {};
-
+    
     lines.forEach(line => {
         line = line.trim();
         if (line.startsWith('#EXTINF:')) {
