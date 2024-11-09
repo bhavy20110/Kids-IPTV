@@ -160,7 +160,7 @@
                 }).then(response => response.ok)
                 .catch(error => false);
             };
-
+            
             // First, try loading the stream without the CORS proxy
             checkCors(streamUrl).then(isCorsEnabled => {
                 if (isCorsEnabled) {
