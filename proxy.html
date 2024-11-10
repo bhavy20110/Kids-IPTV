@@ -17,17 +17,11 @@
             window.location.href = 'index.html'; // Go back to the homepage
         }
 
-        // Check if streamUrl is HTTP and, if so, convert it to HTTPS
-        if (streamUrl.startsWith('http://')) {
-            console.log("Detected HTTP, upgrading to HTTPS");
-            streamUrl = streamUrl.replace('http://', 'https://');
-        }
-
         // Debug log to check the stream URL and name
         console.log("Stream URL:", streamUrl);
         console.log("Channel Name:", channelName);
 
-        // Redirect to the player page with the modified stream URL as a query parameter
+        // Redirect to the player page with the original stream URL as a query parameter
         const playerUrl = `player.html?url=${encodeURIComponent(streamUrl)}&name=${encodeURIComponent(channelName)}`;
         window.location.href = playerUrl;
     </script>
