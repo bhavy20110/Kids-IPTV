@@ -12,10 +12,15 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
         }
         #videoContainer {
             max-width: 800px;
-            margin: auto;
+            width: 100%;
             text-align: center;
             padding: 20px;
         }
@@ -46,6 +51,27 @@
             border-radius: 5px;
             font-size: 14px;
         }
+        #redirect-container {
+            text-align: center;
+            margin: 20px;
+        }
+        #redirect-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #redirect-button:hover {
+            background-color: #0056b3;
+        }
+        #info-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -59,6 +85,11 @@
         </div>
         <div id="debug-log"></div>
         <div class="error-message" id="error-message"></div>
+    </div>
+
+    <div id="redirect-container">
+        <button id="redirect-button">Redirect to HTTP page (Better Experience)</button>
+        <p id="info-text">If it shows that the site is not secure, it is because it is hosted on HTTP. We love your safety. Please trust us...</p>
     </div>
 
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
@@ -95,27 +126,15 @@
                 startLevel: -1, // Auto-detect level
                 capLevelToPlayerSize: true, // Ensure proper scaling
                 maxMaxBufferLength: 30, // Prevents buffering delays
-                xhrSetup: function(xhr, url) {
-                    // Modify the request to handle CORS and chunk URLs properly
-                    if (url.includes('.ts')) {
-                        xhr.setRequestHeader('Origin', window.location.origin); // Set correct origin for chunks
-                    }
-                }
             });
 
-            // Attach event listeners for error handling
             hls.on(Hls.Events.ERROR, function(event, data) {
                 logMessage('HLS.js encountered an error: ' + data.type);
                 if (data.fatal) {
                     if (data.fatal === 'networkError') {
                         errorMessage.innerText = 'Network Error: Unable to fetch the stream.';
-                        console.error('Network error:', data);
                     } else if (data.fatal === 'mediaError') {
                         errorMessage.innerText = 'Media Error: Unable to decode the media.';
-                        console.error('Media error:', data);
-                    } else if (data.fatal === 'otherError') {
-                        errorMessage.innerText = 'Unknown Error: Something went wrong.';
-                        console.error('Unknown error:', data);
                     } else {
                         errorMessage.innerText = 'Error: Unable to load HLS stream.';
                     }
@@ -124,7 +143,6 @@
 
             hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
                 logMessage('HLS.js is parsing the manifest...');
-                // Enable audio track switching
                 if (data.audioTracks && data.audioTracks.length > 1) {
                     logMessage('Multiple audio tracks found.');
                     const audioTrackSelector = document.getElementById('audioTrackSelector');
@@ -135,9 +153,7 @@
                         audioTrackSelector.appendChild(option);
                     });
 
-                    // Show the audio track selector
                     document.getElementById('audio-selector').style.display = 'block';
-
                     audioTrackSelector.addEventListener('change', function() {
                         const trackIndex = audioTrackSelector.value;
                         hls.audioTrack = trackIndex;
@@ -146,40 +162,20 @@
                 }
             });
 
-            // CORS Proxy URL
-            const corsProxyUrl = "https://cors-anywhere.herokuapp.com/";
-
-            // Function to check if CORS is enabled
-            const checkCors = (url) => {
-                return fetch(url, {
-                    method: 'HEAD', 
-                    mode: 'cors',
-                    headers: {
-                        'Origin': window.location.origin,
-                    },
-                }).then(response => response.ok)
-                .catch(error => false);
-            };
-
-            // First, try loading the stream without the CORS proxy
-            checkCors(streamUrl).then(isCorsEnabled => {
-                if (isCorsEnabled) {
-                    logMessage('CORS is enabled, loading stream...');
-                    hls.loadSource(streamUrl);
-                    player.src({ src: streamUrl, type: 'application/x-mpegURL' });
-                } else {
-                    logMessage('CORS is not enabled, using the CORS proxy...');
-                    hls.loadSource(corsProxyUrl + streamUrl);
-                    player.src({ src: corsProxyUrl + streamUrl, type: 'application/x-mpegURL' });
-                }
-            });
-
-            // Bind the HLS.js instance to the player
+            // Load stream without CORS proxy
+            hls.loadSource(streamUrl);
+            player.src({ src: streamUrl, type: 'application/x-mpegURL' });
             hls.attachMedia(videoElement);
         } else {
             errorMessage.innerText = 'HLS.js is not supported in this browser.';
             logMessage('HLS.js is not supported in this browser.');
         }
+
+        // Redirect button handler
+        document.getElementById('redirect-button').onclick = function() {
+            const httpUrl = `http://unknown-playlists.sportsontheweb.net/player.html?url=${encodeURIComponent(streamUrl)}&name=${encodeURIComponent(channelName)}`;
+            window.location.href = httpUrl;
+        };
     </script>
 </body>
 </html>
