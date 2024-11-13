@@ -17,6 +17,9 @@ https://tgaadi-web.tech/stalker/portal.m3u8?id=864
 #EXTINF:-1 tvg-id="Disney India SD 6" tvg-name="Disney India SD 6" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 6
 https://bd.spidy.online/MACX/STREAM4K/play.m3u8?id=475134
 
+#EXTINF:-1 tvg-id="Disney India SD 7" tvg-name="Disney India SD 7" tvg-logo="https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-1356-j5tdnwmw-v1/imageContent-1356-j5tdnwmw-m1.png" group-title="Kids",Disney India SD 7
+https://iptv-live-play1.streamready.in/live/media11/disney_channel/dashc/disney_channel.mpd
+
 #EXTINF:-1 tvg-id="Hungama Kids 1" tvg-name="Hungama Kids 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 1
 https://tgaadi-web.tech/stalker/portal.m3u8?id=9400
 
@@ -34,6 +37,9 @@ https://unknown-playlists.vercel.app/hungama-by-stevosure.m3u8
 
 #EXTINF:-1 tvg-id="Hungama Kids 6" tvg-name="Hungama Kids 6" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 6
 http://xtv.ooo:8080/live/927382370/837382809/150480.m3u8
+
+#EXTINF:-1 tvg-id="Hungama Kids 7" tvg-name="Hungama Kids 7" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hungama_TV.svg/220px-Hungama_TV.svg.png" group-title="Kids",Hungama Kids 7
+https://iptv-live-play1.streamready.in/live/media11/hungama/dashc/hungama.mpd
 
 #EXTINF:-1 tvg-id="(no tvg-id)" tvg-name="Cartoon Network Hindi" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Hindi.png" group-title="Kids",Cartoon Network Hindi
 https://fifabd.xyz/KIDxRANAPK/play.m3u8?id=150478
