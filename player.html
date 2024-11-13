@@ -92,8 +92,11 @@
         <p id="info-text">If it shows that the site is not secure, it is because it is hosted on HTTP. We love your safety. Please trust us...</p>
     </div>
 
+    <!-- Video.js and streaming libraries -->
     <script src="https://vjs.zencdn.net/7.21.1/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+
     <script>
         const params = new URLSearchParams(window.location.search);
         const streamUrl = decodeURIComponent(params.get('url'));
@@ -108,68 +111,73 @@
         };
 
         const errorMessage = document.getElementById('error-message');
-
         let videoElement = document.getElementById('video');
         
         // Initialize Video.js player
         const player = videojs(videoElement, {
-            techOrder: ['html5', 'hls'],
+            techOrder: ['html5', 'hls', 'dash'],
             autoplay: true,
             controls: true,
             preload: 'auto',
             fluid: true,
         });
 
-        // Add HLS.js for custom streams
-        if (Hls.isSupported()) {
+        // Function to load HLS stream
+        const loadHlsStream = () => {
             const hls = new Hls({
-                startLevel: -1, // Auto-detect level
-                capLevelToPlayerSize: true, // Ensure proper scaling
-                maxMaxBufferLength: 30, // Prevents buffering delays
+                startLevel: -1,
+                capLevelToPlayerSize: true,
+                maxMaxBufferLength: 30,
             });
 
             hls.on(Hls.Events.ERROR, function(event, data) {
                 logMessage('HLS.js encountered an error: ' + data.type);
                 if (data.fatal) {
-                    if (data.fatal === 'networkError') {
-                        errorMessage.innerText = 'Network Error: Unable to fetch the stream.';
-                    } else if (data.fatal === 'mediaError') {
-                        errorMessage.innerText = 'Media Error: Unable to decode the media.';
-                    } else {
-                        errorMessage.innerText = 'Error: Unable to load HLS stream.';
-                    }
+                    errorMessage.innerText = 'Error: Unable to load HLS stream.';
                 }
             });
 
             hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
                 logMessage('HLS.js is parsing the manifest...');
-                if (data.audioTracks && data.audioTracks.length > 1) {
-                    logMessage('Multiple audio tracks found.');
-                    const audioTrackSelector = document.getElementById('audioTrackSelector');
-                    data.audioTracks.forEach((track, index) => {
-                        const option = document.createElement('option');
-                        option.value = index;
-                        option.innerText = track.name || `Audio Track ${index + 1}`;
-                        audioTrackSelector.appendChild(option);
-                    });
-
-                    document.getElementById('audio-selector').style.display = 'block';
-                    audioTrackSelector.addEventListener('change', function() {
-                        const trackIndex = audioTrackSelector.value;
-                        hls.audioTrack = trackIndex;
-                        logMessage('Switched to audio track: ' + trackIndex);
-                    });
-                }
+                setupAudioTracks(hls, data);
             });
 
-            // Load stream without CORS proxy
             hls.loadSource(streamUrl);
             player.src({ src: streamUrl, type: 'application/x-mpegURL' });
             hls.attachMedia(videoElement);
-        } else {
-            errorMessage.innerText = 'HLS.js is not supported in this browser.';
-            logMessage('HLS.js is not supported in this browser.');
-        }
+        };
+
+        // Function to load DASH stream
+        const loadDashStream = () => {
+            const dashPlayer = dashjs.MediaPlayer().create();
+            dashPlayer.initialize(videoElement, streamUrl, true);
+
+            dashPlayer.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, function() {
+                logMessage('DASH stream initialized.');
+            });
+
+            dashPlayer.on(dashjs.MediaPlayer.events.ERROR, function(e) {
+                logMessage('DASH.js encountered an error: ' + e.error);
+                errorMessage.innerText = 'Error: Unable to load DASH stream.';
+            });
+        };
+
+        // Helper function to select and load appropriate stream
+        const loadStream = () => {
+            if (streamUrl.endsWith('.m3u8') && Hls.isSupported()) {
+                logMessage('Loading HLS stream...');
+                loadHlsStream();
+            } else if (streamUrl.endsWith('.mpd')) {
+                logMessage('Loading DASH stream...');
+                loadDashStream();
+            } else {
+                errorMessage.innerText = 'Error: Unsupported stream format.';
+                logMessage('Error: Unsupported stream format.');
+            }
+        };
+
+        // Call loadStream to initialize the appropriate player
+        loadStream();
 
         // Redirect button handler
         document.getElementById('redirect-button').onclick = function() {
